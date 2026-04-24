@@ -178,7 +178,7 @@ Best regards,
                 </button>
               </div>
               <div className="p-4 bg-white rounded-b-xl">
-                <pre className="whitespace-pre-wrap text-sm font-sans">{response}</pre>
+                <pre className="whitespace-pre-wrap text-sm font-sans" style={{ fontSize: '10px' }}>{response}</pre>
               </div>
             </motion.div>
           )}

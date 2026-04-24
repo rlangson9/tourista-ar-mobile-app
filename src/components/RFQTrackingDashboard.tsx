@@ -170,8 +170,8 @@ export function RFQTrackingDashboard({ onNavigate }: RFQTrackingDashboardProps) 
             <h3 className="text-gray-600 text-sm">Total RFQs</h3>
             <BarChart2 className="w-5 h-5 text-blue-600" />
           </div>
-          <p className="text-3xl font-bold mb-2">{totalRFQs}</p>
-          <p className="text-sm text-gray-500">Received in selected period</p>
+          <p className="text-3xl font-bold mb-2 text-center">{totalRFQs}</p>
+          <p className="text-sm text-gray-500 text-center">Received in selected period</p>
         </motion.div>
 
         <motion.div
@@ -184,8 +184,8 @@ export function RFQTrackingDashboard({ onNavigate }: RFQTrackingDashboardProps) 
             <h3 className="text-gray-600 text-sm">Completion Rate</h3>
             <CheckCircle className="w-5 h-5 text-green-600" />
           </div>
-          <p className="text-3xl font-bold mb-2">{completionRate.toFixed(1)}%</p>
-          <p className="text-sm text-gray-500">Of total RFQs</p>
+          <p className="text-3xl font-bold mb-2 text-center">{completionRate.toFixed(1)}%</p>
+          <p className="text-sm text-gray-500 text-center">Of total RFQs</p>
         </motion.div>
 
         <motion.div
@@ -198,8 +198,8 @@ export function RFQTrackingDashboard({ onNavigate }: RFQTrackingDashboardProps) 
             <h3 className="text-gray-600 text-sm">Avg Response Time</h3>
             <Clock className="w-5 h-5 text-purple-600" />
           </div>
-          <p className="text-3xl font-bold mb-2">{avgResponseTime.toFixed(1)}h</p>
-          <p className="text-sm text-gray-500">From submission to response</p>
+          <p className="text-3xl font-bold mb-2 text-center">{avgResponseTime.toFixed(1)}h</p>
+          <p className="text-sm text-gray-500 text-center">From submission to response</p>
         </motion.div>
 
         <motion.div
@@ -212,8 +212,8 @@ export function RFQTrackingDashboard({ onNavigate }: RFQTrackingDashboardProps) 
             <h3 className="text-gray-600 text-sm">Avg Satisfaction</h3>
             <Users className="w-5 h-5 text-amber-600" />
           </div>
-          <p className="text-3xl font-bold mb-2">{avgSatisfaction.toFixed(1)}/5</p>
-          <p className="text-sm text-gray-500">Based on completed RFQs</p>
+          <p className="text-3xl font-bold mb-2 text-center">{avgSatisfaction.toFixed(1)}/5</p>
+          <p className="text-sm text-gray-500 text-center">Based on completed RFQs</p>
         </motion.div>
       </div>
 

@@ -37,13 +37,14 @@ import type { Screen } from '../App';
 
 import { AdCreationForm, AdFormData } from './AdCreationForm';
 import { WithdrawalManager } from './WithdrawalManager';
+import { PartnerTourMatching } from './PartnerTourMatching';
 
 interface PartnerDashboardProps {
   onNavigate: (screen: Screen) => void;
 }
 
 export function PartnerDashboard({ onNavigate }: PartnerDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'tours' | 'bookings' | 'revenue' | 'payments' | 'advertisements' | 'analytics' | 'automation' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tours' | 'bookings' | 'revenue' | 'payments' | 'advertisements' | 'analytics' | 'automation' | 'tour-matching' | 'settings'>('overview');
   const [isVerified, setIsVerified] = useState(true);
 
   return (
@@ -130,9 +131,9 @@ export function PartnerDashboard({ onNavigate }: PartnerDashboardProps) {
           />
           <NavItem
             icon={Scale}
-            label="Negotiation Tool"
-            isActive={activeTab === 'negotiation'}
-            onClick={() => onNavigate('negotiation-tool')}
+            label="Tour Matching"
+            isActive={activeTab === 'tour-matching'}
+            onClick={() => setActiveTab('tour-matching')}
           />
           <NavItem
             icon={Settings}
@@ -145,7 +146,7 @@ export function PartnerDashboard({ onNavigate }: PartnerDashboardProps) {
 
       {/* Main Content */}
       <div className="ml-64 p-8">
-        {activeTab === 'overview' && <OverviewTab />}
+        {activeTab === 'overview' && <OverviewTab onNavigate={setActiveTab} />}
         {activeTab === 'tours' && <ToursTab />}
         {activeTab === 'bookings' && <BookingsTab />}
         {activeTab === 'revenue' && <RevenueTab />}
@@ -153,6 +154,7 @@ export function PartnerDashboard({ onNavigate }: PartnerDashboardProps) {
         {activeTab === 'advertisements' && <AdvertisementsTab />}
         {activeTab === 'analytics' && <AnalyticsTab />}
         {activeTab === 'automation' && <AutomationTab />}
+        {activeTab === 'tour-matching' && <PartnerTourMatching />}
         {activeTab === 'settings' && <SettingsTab />}
       </div>
     </div>
@@ -194,7 +196,7 @@ function NavItem({
   );
 }
 
-function OverviewTab() {
+function OverviewTab({ onNavigate }: { onNavigate: (tab: string) => void }) {
   return (
     <div>
       <div className="mb-8">
@@ -501,6 +503,25 @@ function ToursTab() {
 
 function BookingsTab() {
   const [bookingFilter, setBookingFilter] = useState<'all' | 'confirmed' | 'pending' | 'cancelled'>('all');
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  
+  const bookings = Array.from({ length: 5 }).map((_, i) => ({
+    id: `BK-${1234 + i}`,
+    tour: 'Beijing Tour',
+    duration: '7 days',
+    customer: 'John Doe',
+    email: 'john@email.com',
+    date: `Mar ${15 + i}, 2026`,
+    travelers: 2,
+    amount: '$4,998',
+    status: 'Confirmed',
+    phone: '+1 555-123-4567',
+    address: '123 Main St, New York, NY 10001',
+    specialRequests: 'Vegetarian meals, early check-in requested',
+    paymentMethod: 'Credit Card',
+    bookingDate: 'Feb 20, 2026',
+  }));
 
   return (
     <div>
@@ -551,27 +572,33 @@ function BookingsTab() {
             </tr>
           </thead>
           <tbody>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-4 font-mono text-sm">BK-{1234 + i}</td>
+            {bookings.map((booking) => (
+              <tr key={booking.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="p-4 font-mono text-sm">{booking.id}</td>
                 <td className="p-4">
-                  <div className="font-semibold">Beijing Tour</div>
-                  <div className="text-xs text-gray-500">7 days</div>
+                  <div className="font-semibold">{booking.tour}</div>
+                  <div className="text-xs text-gray-500">{booking.duration}</div>
                 </td>
                 <td className="p-4">
-                  <div className="font-semibold">John Doe</div>
-                  <div className="text-xs text-gray-500">john@email.com</div>
+                  <div className="font-semibold">{booking.customer}</div>
+                  <div className="text-xs text-gray-500">{booking.email}</div>
                 </td>
-                <td className="p-4">Mar {15 + i}, 2026</td>
-                <td className="p-4">2</td>
-                <td className="p-4 font-bold">$4,998</td>
+                <td className="p-4">{booking.date}</td>
+                <td className="p-4">{booking.travelers}</td>
+                <td className="p-4 font-bold">{booking.amount}</td>
                 <td className="p-4">
                   <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
-                    Confirmed
+                    {booking.status}
                   </span>
                 </td>
                 <td className="p-4">
-                  <button className="text-blue-600 hover:underline text-sm font-semibold">
+                  <button 
+                    className="text-blue-600 hover:underline text-sm font-semibold"
+                    onClick={() => {
+                      setSelectedBooking(booking);
+                      setShowBookingModal(true);
+                    }}
+                  >
                     View Details
                   </button>
                 </td>
@@ -580,6 +607,127 @@ function BookingsTab() {
           </tbody>
         </table>
       </div>
+
+      {/* Booking Details Modal */}
+      {showBookingModal && selectedBooking && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl my-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">Booking Details</h3>
+              <button 
+                onClick={() => setShowBookingModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Booking Status Badge */}
+              <div className="flex items-center justify-between bg-blue-50 p-4 rounded-xl">
+                <div>
+                  <p className="text-sm text-gray-600">Booking ID</p>
+                  <p className="text-lg font-bold">{selectedBooking.id}</p>
+                </div>
+                <span className="bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold">
+                  {selectedBooking.status}
+                </span>
+              </div>
+
+              {/* Customer Information */}
+              <div className="bg-gray-50 p-4 rounded-xl">
+                <h4 className="font-semibold text-gray-800 mb-3">Customer Information</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500">Name</p>
+                    <p className="font-semibold">{selectedBooking.customer}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Email</p>
+                    <p className="font-semibold">{selectedBooking.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Phone</p>
+                    <p className="font-semibold">{selectedBooking.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Address</p>
+                    <p className="font-semibold">{selectedBooking.address}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tour Information */}
+              <div className="bg-gray-50 p-4 rounded-xl">
+                <h4 className="font-semibold text-gray-800 mb-3">Tour Information</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500">Tour Name</p>
+                    <p className="font-semibold">{selectedBooking.tour}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Duration</p>
+                    <p className="font-semibold">{selectedBooking.duration}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Travel Date</p>
+                    <p className="font-semibold">{selectedBooking.date}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Travelers</p>
+                    <p className="font-semibold">{selectedBooking.travelers} {selectedBooking.travelers === 1 ? 'person' : 'people'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Information */}
+              <div className="bg-gray-50 p-4 rounded-xl">
+                <h4 className="font-semibold text-gray-800 mb-3">Payment Information</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500">Total Amount</p>
+                    <p className="text-xl font-bold text-blue-600">{selectedBooking.amount}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Payment Method</p>
+                    <p className="font-semibold">{selectedBooking.paymentMethod}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Booking Date</p>
+                    <p className="font-semibold">{selectedBooking.bookingDate}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Special Requests */}
+              {selectedBooking.specialRequests && (
+                <div className="bg-gray-50 p-4 rounded-xl">
+                  <h4 className="font-semibold text-gray-800 mb-2">Special Requests</h4>
+                  <p className="text-sm text-gray-600">{selectedBooking.specialRequests}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowBookingModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  alert('Booking details sent to customer email');
+                  setShowBookingModal(false);
+                }}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+              >
+                Send Confirmation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1290,34 +1438,34 @@ function AdvertisementsTab() {
       </div>
 
       {/* Ads Table */}
-      <div className="bg-white rounded-2xl shadow-sm">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Campaign Details</h2>
+      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">Campaign Details</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[1000px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Impressions</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clicks</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">New Clients</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ROI</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Impressions</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clicks</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">New Clients</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ROI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {ads.map((ad) => (
                 <tr key={ad.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <div>
-                      <p className="font-medium text-gray-900">{ad.title}</p>
-                      <p className="text-sm text-gray-500">ID: {ad.id}</p>
+                      <p className="font-medium text-gray-900 text-xs">{ad.title}</p>
+                      <p className="text-xs text-gray-500">ID: {ad.id}</p>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(ad.status)}`}>
                       {getStatusText(ad.status)}
                     </span>
@@ -1325,7 +1473,7 @@ function AdvertisementsTab() {
                       <p className="text-xs text-red-600 mt-1">{ad.rejectionReason}</p>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-4 py-3 text-xs text-gray-900 whitespace-nowrap">
                     {new Date(ad.submittedDate).toLocaleDateString()}
                     {ad.approvedDate && (
                       <p className="text-xs text-green-600 mt-1">
@@ -1333,12 +1481,12 @@ function AdvertisementsTab() {
                       </p>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{ad.impressions.toLocaleString()}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{ad.clicks.toLocaleString()}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{ad.conversions}</td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">${ad.revenue.toLocaleString()}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={`font-medium ${ad.roi > 0 ? 'text-green-600' : 'text-gray-500'}`}>
+                  <td className="px-4 py-3 text-xs text-gray-900 text-right">{ad.impressions.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-xs text-gray-900 text-right">{ad.clicks.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-xs text-gray-900 text-right">{ad.conversions}</td>
+                  <td className="px-4 py-3 text-xs font-medium text-gray-900 text-right">${ad.revenue.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-xs text-right">
+                    <span className={`font-semibold ${ad.roi > 0 ? 'text-green-600' : 'text-gray-400'}`}>
                       {ad.roi > 0 ? `${ad.roi}%` : '-'}
                     </span>
                   </td>

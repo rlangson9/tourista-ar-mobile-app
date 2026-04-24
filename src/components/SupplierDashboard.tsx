@@ -73,10 +73,10 @@ export function SupplierDashboard({ onNavigate }: SupplierDashboardProps) {
               <p className="text-xs text-gray-500">Supplier Portal</p>
             </div>
           </div>
-          <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4">
-            <p className="text-sm text-gray-600 mb-1">Supplier</p>
-            <p className="font-bold text-gray-900">Guangzhou Precision Mfg</p>
-            <div className="flex items-center gap-1 mt-2">
+          <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4 text-center">
+            <p className="text-sm text-gray-600 mb-1" style={{ textAlign: 'center' }}>Supplier</p>
+            <p className="font-bold text-gray-900" style={{ textAlign: 'center' }}>Guangzhou Precision Mfg</p>
+            <div className="flex items-center gap-1 mt-2 justify-center">
               <Shield className="w-4 h-4 text-green-600" />
               <span className="text-xs font-semibold text-green-700">Verified</span>
             </div>
@@ -168,8 +168,8 @@ export function SupplierDashboard({ onNavigate }: SupplierDashboardProps) {
       </div>
 
       {/* Main Content */}
-      <div className="ml-64 p-8">
-        {activeTab === 'overview' && <OverviewTab />}
+      <div className="ml-64 p-8 h-screen overflow-hidden">
+        {activeTab === 'overview' && <OverviewTab onNavigate={setActiveTab} />}
         {activeTab === 'products' && <ProductsTab />}
         {activeTab === 'inventory' && <InventoryTab />}
         {activeTab === 'rfqs' && <RFQsTab />}
@@ -367,9 +367,9 @@ function MessagesTab() {
     <div className="h-full relative">
       <div className="flex h-full">
         {/* Left Side: Contact List */}
-        <div className="w-80 border-r border-gray-200 bg-white flex flex-col">
+        <div className="w-80 border-r border-gray-200 bg-white flex flex-col h-full">
           {/* Search Bar */}
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-4 border-b border-gray-200 flex-shrink-0">
             <div className="relative">
               <input
                 type="text"
@@ -409,9 +409,9 @@ function MessagesTab() {
         </div>
 
         {/* Right Side: Chat Window */}
-        <div className="flex-1 flex flex-col bg-white relative">
+        <div className="flex-1 flex flex-col bg-white relative h-full">
           {/* Chat Header */}
-          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+          <div className="p-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                 <span className="font-semibold text-gray-600">{activeConv?.avatar}</span>
@@ -482,7 +482,7 @@ function MessagesTab() {
           </div>
 
           {/* Chat Input */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-gray-200 flex-shrink-0">
             <div className="flex gap-2 items-center relative">
               <div className="relative">
                 <button 
@@ -640,7 +640,34 @@ function MessagesTab() {
   );
 }
 
-function OverviewTab() {
+function OverviewTab({ onNavigate }: { onNavigate: (tab: any) => void }) {
+  const rfqs = [
+    {
+      id: 'RFQ-20240001',
+      title: 'Industrial CNC Machine Request',
+      status: 'new' as const,
+      quantity: '5 units',
+      budget: '$120K-150K',
+      timeline: '2 hours ago',
+    },
+    {
+      id: 'RFQ-20240002',
+      title: 'Laser Cutting System',
+      status: 'pending' as const,
+      quantity: '2 units',
+      budget: '$80K-100K',
+      timeline: '5 hours ago',
+    },
+    {
+      id: 'RFQ-20240003',
+      title: 'Industrial Robot Arm',
+      status: 'quoted' as const,
+      quantity: '3 units',
+      budget: '$150K-200K',
+      timeline: '1 day ago',
+    }
+  ];
+
   return (
     <div>
       <div className="mb-8">
@@ -659,18 +686,35 @@ function OverviewTab() {
       {/* Recent Activity */}
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <h3 className="font-bold text-lg mb-4">Recent RFQs</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-lg">Recent RFQs</h3>
+            <button
+              onClick={() => onNavigate('rfqs')}
+              className="text-blue-600 text-sm font-semibold hover:underline"
+            >
+              View All
+            </button>
+          </div>
           <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition cursor-pointer">
+            {rfqs.slice(0, 3).map((rfq) => (
+              <div
+                key={rfq.id}
+                onClick={() => onNavigate('rfqs')}
+                className="p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition cursor-pointer"
+              >
                 <div className="flex items-start justify-between mb-2">
-                  <p className="font-semibold text-sm">Industrial CNC Machine Request</p>
-                  <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full font-semibold">
-                    New
+                  <p className="font-semibold text-sm">{rfq.title}</p>
+                  <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                    rfq.status === 'new' ? 'bg-amber-100 text-amber-700' :
+                    rfq.status === 'pending' ? 'bg-blue-100 text-blue-700' :
+                    rfq.status === 'quoted' ? 'bg-green-100 text-green-700' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>
+                    {rfq.status.charAt(0).toUpperCase() + rfq.status.slice(1)}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">Quantity: 5 units • Budget: $120K-150K</p>
-                <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
+                <p className="text-xs text-gray-500">Quantity: {rfq.quantity} • Budget: {rfq.budget}</p>
+                <p className="text-xs text-gray-400 mt-1">{rfq.timeline}</p>
               </div>
             ))}
           </div>
@@ -740,17 +784,136 @@ function ProductsTab() {
   ]);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [viewingProduct, setViewingProduct] = useState<any>(null);
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [showEditProduct, setShowEditProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    category: 'Machinery',
+    priceMin: '',
+    priceMax: '',
+    moq: '1 unit',
+    image: '',
+    description: ''
+  });
+  const [editProductData, setEditProductData] = useState({
+    name: '',
+    category: 'Machinery',
+    priceMin: '',
+    priceMax: '',
+    moq: '',
+    description: '',
+    images: [] as string[],
+    videos: [] as string[],
+    specifications: [] as { key: string; value: string }[],
+    status: 'active' as 'active' | 'inactive'
+  });
+
+  const handleView = (product: any) => {
+    setViewingProduct(product);
+  };
 
   const handleEdit = (product: any) => {
     setEditingProduct(product);
-    // In a real app, this would open a modal with an edit form
-    alert(`Editing product: ${product.name}`);
-    // For demo purposes, we'll just toggle the status
+    // Initialize edit form with current product data
+    const [minPrice, maxPrice] = product.priceRange.replace('$', '').split(' - ').map(p => p.replace('K', ''));
+    setEditProductData({
+      name: product.name,
+      category: product.category,
+      priceMin: minPrice,
+      priceMax: maxPrice,
+      moq: product.moq,
+      description: product.description || '',
+      images: product.images || [product.image],
+      videos: product.videos || [],
+      specifications: product.specifications || [],
+      status: product.status
+    });
+    setShowEditProduct(true);
+  };
+
+  const handleEditSubmit = () => {
+    if (!editProductData.name || !editProductData.priceMin || !editProductData.priceMax) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    const updatedProduct = {
+      ...editingProduct,
+      name: editProductData.name,
+      category: editProductData.category,
+      priceRange: `$${editProductData.priceMin}K - $${editProductData.priceMax}K`,
+      moq: editProductData.moq,
+      description: editProductData.description,
+      images: editProductData.images,
+      videos: editProductData.videos,
+      specifications: editProductData.specifications,
+      status: editProductData.status,
+      image: editProductData.images[0] || editingProduct.image
+    };
+
     setProducts(prev => prev.map(p => 
-      p.id === product.id 
-        ? { ...p, status: p.status === 'active' ? 'inactive' : 'active' }
-        : p
+      p.id === editingProduct.id ? updatedProduct : p
     ));
+
+    setShowEditProduct(false);
+    setEditingProduct(null);
+    alert('Product updated successfully!');
+  };
+
+  const handleAddImage = (imageUrl: string) => {
+    if (imageUrl.trim()) {
+      setEditProductData({
+        ...editProductData,
+        images: [...editProductData.images, imageUrl.trim()]
+      });
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setEditProductData({
+      ...editProductData,
+      images: editProductData.images.filter((_, i) => i !== index)
+    });
+  };
+
+  const handleAddVideo = (videoUrl: string) => {
+    if (videoUrl.trim()) {
+      setEditProductData({
+        ...editProductData,
+        videos: [...editProductData.videos, videoUrl.trim()]
+      });
+    }
+  };
+
+  const handleRemoveVideo = (index: number) => {
+    setEditProductData({
+      ...editProductData,
+      videos: editProductData.videos.filter((_, i) => i !== index)
+    });
+  };
+
+  const handleAddSpecification = () => {
+    setEditProductData({
+      ...editProductData,
+      specifications: [...editProductData.specifications, { key: '', value: '' }]
+    });
+  };
+
+  const handleUpdateSpecification = (index: number, field: 'key' | 'value', value: string) => {
+    const newSpecs = [...editProductData.specifications];
+    newSpecs[index][field] = value;
+    setEditProductData({
+      ...editProductData,
+      specifications: newSpecs
+    });
+  };
+
+  const handleRemoveSpecification = (index: number) => {
+    setEditProductData({
+      ...editProductData,
+      specifications: editProductData.specifications.filter((_, i) => i !== index)
+    });
   };
 
   const handleDelete = (productId: string) => {
@@ -766,6 +929,40 @@ function ProductsTab() {
     setShowDeleteConfirm(null);
   };
 
+  const handleAddProduct = () => {
+    setShowAddProduct(true);
+  };
+
+  const handleAddProductSubmit = () => {
+    if (!newProduct.name || !newProduct.priceMin || !newProduct.priceMax) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    const product = {
+      id: (products.length + 1).toString(),
+      name: newProduct.name,
+      category: newProduct.category,
+      priceRange: `$${newProduct.priceMin}K - $${newProduct.priceMax}K`,
+      moq: newProduct.moq,
+      orders: '0 this month',
+      status: 'active',
+      image: newProduct.image || 'https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=200'
+    };
+
+    setProducts([...products, product]);
+    setShowAddProduct(false);
+    setNewProduct({
+      name: '',
+      category: 'Machinery',
+      priceMin: '',
+      priceMax: '',
+      moq: '1 unit',
+      image: '',
+      description: ''
+    });
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -773,7 +970,10 @@ function ProductsTab() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Product Management</h1>
           <p className="text-gray-500">Manage your product listings</p>
         </div>
-        <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition flex items-center gap-2">
+        <button 
+          className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition flex items-center gap-2"
+          onClick={handleAddProduct}
+        >
           <Plus className="w-5 h-5" />
           Add New Product
         </button>
@@ -816,19 +1016,22 @@ function ProductsTab() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center gap-1">
+                <button 
+                  className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center gap-1 text-sm"
+                  onClick={() => handleView(product)}
+                >
                   <Eye className="w-4 h-4" />
                   View
                 </button>
                 <button 
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center gap-1"
+                  className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center gap-1 text-sm"
                   onClick={() => handleEdit(product)}
                 >
                   <Edit className="w-4 h-4" />
                   Edit
                 </button>
                 <button 
-                  className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition flex items-center gap-1"
+                  className="px-3 py-1 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition flex items-center gap-1 text-sm"
                   onClick={() => handleDelete(product.id)}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -858,6 +1061,417 @@ function ProductsTab() {
                 onClick={() => confirmDelete(showDeleteConfirm)}
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Product Modal */}
+      {viewingProduct && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">Product Details</h3>
+              <button onClick={() => setViewingProduct(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <img
+                src={viewingProduct.image}
+                alt={viewingProduct.name}
+                className="w-full h-48 rounded-lg object-cover"
+              />
+              <div className="bg-blue-50 rounded-xl p-4">
+                <p className="text-sm text-gray-500 mb-1">Product Name</p>
+                <p className="text-lg font-bold">{viewingProduct.name}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Category</p>
+                  <p className="font-bold">{viewingProduct.category}</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Status</p>
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    viewingProduct.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {viewingProduct.status.charAt(0).toUpperCase() + viewingProduct.status.slice(1)}
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Price Range</p>
+                  <p className="font-bold text-blue-600">{viewingProduct.priceRange}</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">MOQ</p>
+                  <p className="font-bold">{viewingProduct.moq}</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Orders</p>
+                  <p className="font-bold">{viewingProduct.orders}</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setViewingProduct(null)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setViewingProduct(null);
+                  handleEdit(viewingProduct);
+                }}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+              >
+                Edit Product
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Product Modal */}
+      {showAddProduct && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">Add New Product</h3>
+              <button onClick={() => setShowAddProduct(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name *</label>
+                <input
+                  type="text"
+                  placeholder="Enter product name"
+                  value={newProduct.name}
+                  onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                <select
+                  value={newProduct.category}
+                  onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                >
+                  <option value="Machinery">Machinery</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Equipment">Equipment</option>
+                  <option value="Tools">Tools</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Min Price (K) *</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 15"
+                    value={newProduct.priceMin}
+                    onChange={(e) => setNewProduct({...newProduct, priceMin: e.target.value})}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Max Price (K) *</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 28"
+                    value={newProduct.priceMax}
+                    onChange={(e) => setNewProduct({...newProduct, priceMax: e.target.value})}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Minimum Order Quantity</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 1 unit"
+                  value={newProduct.moq}
+                  onChange={(e) => setNewProduct({...newProduct, moq: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Image URL</label>
+                <input
+                  type="text"
+                  placeholder="Enter image URL (optional)"
+                  value={newProduct.image}
+                  onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                <textarea
+                  placeholder="Enter product description (optional)"
+                  value={newProduct.description}
+                  onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 h-24"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowAddProduct(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddProductSubmit}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+              >
+                Add Product
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Product Modal */}
+      {showEditProduct && editingProduct && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl my-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">Edit Product</h3>
+              <button onClick={() => setShowEditProduct(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
+              {/* Product Name & Category */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name *</label>
+                  <input
+                    type="text"
+                    placeholder="Enter product name"
+                    value={editProductData.name}
+                    onChange={(e) => setEditProductData({...editProductData, name: e.target.value})}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                  <select
+                    value={editProductData.category}
+                    onChange={(e) => setEditProductData({...editProductData, category: e.target.value})}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  >
+                    <option value="Machinery">Machinery</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Equipment">Equipment</option>
+                    <option value="Tools">Tools</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Price Range */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Min Price (K) *</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 15"
+                    value={editProductData.priceMin}
+                    onChange={(e) => setEditProductData({...editProductData, priceMin: e.target.value})}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Max Price (K) *</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 28"
+                    value={editProductData.priceMax}
+                    onChange={(e) => setEditProductData({...editProductData, priceMax: e.target.value})}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+              </div>
+
+              {/* MOQ & Status */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Minimum Order Quantity</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 1 unit"
+                    value={editProductData.moq}
+                    onChange={(e) => setEditProductData({...editProductData, moq: e.target.value})}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                  <select
+                    value={editProductData.status}
+                    onChange={(e) => setEditProductData({...editProductData, status: e.target.value as 'active' | 'inactive'})}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Images Section */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Images</label>
+                <div className="grid grid-cols-4 gap-3 mb-3">
+                  {editProductData.images.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <img src={img} alt={`Product ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                      <button
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Paste image URL"
+                    className="flex-1 border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    id="editImageUrl"
+                  />
+                  <button
+                    onClick={() => {
+                      const input = document.getElementById('editImageUrl') as HTMLInputElement;
+                      if (input) {
+                        handleAddImage(input.value);
+                        input.value = '';
+                      }
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+                  >
+                    Add Image
+                  </button>
+                </div>
+              </div>
+
+              {/* Videos Section */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Videos</label>
+                <div className="space-y-2 mb-3">
+                  {editProductData.videos.map((video, index) => (
+                    <div key={index} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                      <span className="text-sm truncate flex-1">{video}</span>
+                      <button
+                        onClick={() => handleRemoveVideo(index)}
+                        className="ml-2 text-red-500 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Paste video URL"
+                    className="flex-1 border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    id="editVideoUrl"
+                  />
+                  <button
+                    onClick={() => {
+                      const input = document.getElementById('editVideoUrl') as HTMLInputElement;
+                      if (input) {
+                        handleAddVideo(input.value);
+                        input.value = '';
+                      }
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+                  >
+                    Add Video
+                  </button>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Description</label>
+                <textarea
+                  placeholder="Enter product description"
+                  value={editProductData.description}
+                  onChange={(e) => setEditProductData({...editProductData, description: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 h-32"
+                />
+              </div>
+
+              {/* Specifications */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-sm font-semibold text-gray-700">Product Specifications</label>
+                  <button
+                    onClick={handleAddSpecification}
+                    className="text-sm text-blue-600 hover:text-blue-700 font-semibold"
+                  >
+                    + Add Specification
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {editProductData.specifications.map((spec, index) => (
+                    <div key={index} className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        placeholder="Specification name"
+                        value={spec.key}
+                        onChange={(e) => handleUpdateSpecification(index, 'key', e.target.value)}
+                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Value"
+                          value={spec.value}
+                          onChange={(e) => handleUpdateSpecification(index, 'value', e.target.value)}
+                          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        />
+                        <button
+                          onClick={() => handleRemoveSpecification(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowEditProduct(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditSubmit}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+              >
+                Save Changes
               </button>
             </div>
           </div>
@@ -922,6 +1536,11 @@ function InventoryTab() {
   ]);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [viewingItem, setViewingItem] = useState<any>(null);
+
+  const handleView = (item: any) => {
+    setViewingItem(item);
+  };
 
   const handleEdit = (item: any) => {
     setEditingItem(item);
@@ -997,27 +1616,32 @@ function InventoryTab() {
             {inventoryItems.map((item) => (
               <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="p-4">
-                  <p className="font-semibold">{item.productName}</p>
+                  <p className="font-semibold text-xs text-center">{item.productName}</p>
                 </td>
-                <td className="p-4 font-mono text-sm">{item.sku}</td>
-                <td className="p-4 font-semibold">{item.currentStock}</td>
-                <td className="p-4">{item.minStock}</td>
-                <td className="p-4">
+                <td className="p-4 font-mono text-xs text-center">{item.sku}</td>
+                <td className="p-4 font-semibold text-xs text-center">{item.currentStock}</td>
+                <td className="p-4 text-xs text-center">{item.minStock}</td>
+                <td className="p-4 text-center">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
                     {getStatusText(item.status)}
                   </span>
                 </td>
-                <td className="p-4">{item.location}</td>
-                <td className="p-4 text-sm text-gray-500">{item.lastUpdated}</td>
+                <td className="p-4 text-xs text-center">{item.location}</td>
+                <td className="p-4 text-xs text-gray-500 text-center">{item.lastUpdated}</td>
                 <td className="p-4">
-                  <div className="flex gap-2">
-                    <button className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm flex items-center gap-1">
+                  <div className="flex gap-2" style={{ marginLeft: '-10px', marginRight: '-10px' }}>
+                    <button 
+                      className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm flex items-center gap-1" 
+                      style={{ width: '69px', fontSize: '10px' }}
+                      onClick={() => handleView(item)}
+                    >
                       <Eye className="w-4 h-4" />
                       View
                     </button>
                     <button 
                       className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm flex items-center gap-1"
                       onClick={() => handleEdit(item)}
+                      style={{ color: '#1100ff', width: '63px', fontSize: '10px' }}
                     >
                       <Edit className="w-4 h-4" />
                       Edit
@@ -1025,6 +1649,7 @@ function InventoryTab() {
                     <button 
                       className="px-3 py-1 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition text-sm flex items-center gap-1"
                       onClick={() => handleDelete(item.id)}
+                      style={{ width: '69px', fontSize: '10px' }}
                     >
                       <Trash2 className="w-4 h-4" />
                       Delete
@@ -1082,62 +1707,455 @@ function InventoryTab() {
           </div>
         </div>
       )}
+
+      {/* View Inventory Modal */}
+      {viewingItem && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">Inventory Details</h3>
+              <button onClick={() => setViewingItem(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-blue-50 rounded-xl p-4">
+                <p className="text-sm text-gray-500 mb-1">Product Name</p>
+                <p className="text-lg font-bold">{viewingItem.productName}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">SKU</p>
+                  <p className="font-mono font-bold">{viewingItem.sku}</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Location</p>
+                  <p className="font-bold">{viewingItem.location}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Current Stock</p>
+                  <p className="text-lg font-bold text-blue-600">{viewingItem.currentStock}</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Minimum Stock</p>
+                  <p className="text-lg font-bold">{viewingItem.minStock}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Status</p>
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(viewingItem.status)}`}>
+                    {getStatusText(viewingItem.status)}
+                  </span>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Last Updated</p>
+                  <p className="font-bold">{viewingItem.lastUpdated}</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setViewingItem(null)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setViewingItem(null);
+                  handleEdit(viewingItem);
+                }}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+              >
+                Edit Item
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 function RFQsTab() {
+  const [selectedRFQ, setSelectedRFQ] = useState<string | null>(null);
+  const [rfqFilter, setRfqFilter] = useState<'all' | 'new' | 'pending' | 'quoted' | 'won' | 'lost'>('all');
+  const [showCreateQuote, setShowCreateQuote] = useState(false);
+  const [showRespondRFQ, setShowRespondRFQ] = useState<string | null>(null);
+  const [showViewQuote, setShowViewQuote] = useState<string | null>(null);
+  const [quoteData, setQuoteData] = useState({
+    price: '',
+    quantity: '',
+    validity: '30 days',
+    notes: ''
+  });
+  const [responseData, setResponseData] = useState({
+    message: '',
+    suggestedPrice: '',
+    quantity: ''
+  });
+  
+  const rfqs = [
+    {
+      id: 'RFQ-20240001',
+      title: 'Industrial CNC Machine Request',
+      status: 'new' as const,
+      quantity: '5 units',
+      budget: '$120K-150K',
+      buyer: 'ABC Manufacturing Co.',
+      description: 'Looking for high-precision CNC milling machines for industrial metal processing. Need machines with at least 5-axis capability.',
+      timeline: '2 hours ago',
+      destination: 'Los Angeles, USA',
+      preferredShipping: 'Sea Freight'
+    },
+    {
+      id: 'RFQ-20240002',
+      title: 'Laser Cutting System',
+      status: 'pending' as const,
+      quantity: '2 units',
+      budget: '$80K-100K',
+      buyer: 'XYZ Industries',
+      description: 'Requesting quotes for industrial laser cutting systems with auto-feed capability.',
+      timeline: '5 hours ago',
+      destination: 'Hamburg, Germany',
+      preferredShipping: 'Air Freight'
+    },
+    {
+      id: 'RFQ-20240003',
+      title: 'Industrial Robot Arm',
+      status: 'quoted' as const,
+      quantity: '3 units',
+      budget: '$150K-200K',
+      buyer: 'TechCorp Ltd.',
+      description: 'Looking for 6-axis industrial robot arms for assembly line automation.',
+      timeline: '1 day ago',
+      destination: 'Tokyo, Japan',
+      preferredShipping: 'Sea Freight'
+    }
+  ];
+
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">RFQ Management</h1>
-        <p className="text-gray-500">Review and respond to sourcing requests</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">RFQ Management</h1>
+            <p className="text-gray-500">Review and respond to sourcing requests</p>
+          </div>
+          <button 
+            className="px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+            onClick={() => setShowCreateQuote(true)}
+          >
+            Create Quote
+          </button>
+        </div>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex gap-2 mb-6">
+        {(['all', 'new', 'pending', 'quoted', 'won', 'lost'] as const).map((filter) => (
+          <button
+            key={filter}
+            onClick={() => setRfqFilter(filter)}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+              rfqFilter === filter
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            }`}
+          >
+            {filter.charAt(0).toUpperCase() + filter.slice(1)}
+            {filter === 'new' && ' (1)'}
+            {filter === 'pending' && ' (1)'}
+            {filter === 'quoted' && ' (1)'}
+          </button>
+        ))}
       </div>
 
       <div className="space-y-4">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition">
+        {rfqs
+          .filter(rfq => rfqFilter === 'all' || rfq.status === rfqFilter)
+          .map((rfq) => (
+          <div 
+            key={rfq.id}
+            className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition cursor-pointer border border-gray-200"
+            onClick={() => setSelectedRFQ(rfq.id)}
+          >
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="font-bold text-lg mb-1">Industrial Machinery Sourcing</h3>
-                <p className="text-sm text-gray-500">RFQ ID: RFQ-2024{i.toString().padStart(4, '0')}</p>
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="font-bold text-lg">{rfq.title}</h3>
+                  <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
+                    rfq.status === 'new' ? 'bg-amber-100 text-amber-700' :
+                    rfq.status === 'pending' ? 'bg-blue-100 text-blue-700' :
+                    rfq.status === 'quoted' ? 'bg-green-100 text-green-700' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>
+                    {rfq.status.charAt(0).toUpperCase() + rfq.status.slice(1)}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500">{rfq.id}</p>
               </div>
-              <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm font-semibold">
-                Pending
-              </span>
+              <div className="text-right">
+                <p className="font-bold text-lg text-blue-600">{rfq.budget}</p>
+                <p className="text-xs text-gray-500">{rfq.quantity}</p>
+              </div>
             </div>
-            <div className="grid grid-cols-4 gap-4 mb-4">
+            <p className="text-sm text-gray-600 mb-4">{rfq.description}</p>
+            <div className="grid grid-cols-3 gap-4 mb-4">
               <div>
-                <p className="text-xs text-gray-500">Quantity</p>
-                <p className="font-semibold">{5 + i} units</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Budget Range</p>
-                <p className="font-semibold">${100 + i * 20}K-${150 + i * 25}K</p>
+                <p className="text-xs text-gray-500">Buyer</p>
+                <p className="text-sm font-medium">{rfq.buyer}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Destination</p>
-                <p className="font-semibold">South Africa</p>
+                <p className="text-sm font-medium">{rfq.destination}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Timeline</p>
-                <p className="font-semibold">30-60 days</p>
+                <p className="text-xs text-gray-500">Preferred Shipping</p>
+                <p className="text-sm font-medium">{rfq.preferredShipping}</p>
               </div>
             </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Looking for high-precision CNC milling machines for industrial metal processing...
-            </p>
-            <div className="flex gap-3">
-              <button className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-50 transition">
-                View Details
-              </button>
-              <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-                Send Quotation
-              </button>
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <p className="text-xs text-gray-400">{rfq.timeline}</p>
+              <div className="flex gap-2">
+                {rfq.status === 'new' && (
+                  <button 
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowRespondRFQ(rfq.id);
+                    }}
+                  >
+                    Respond to RFQ
+                  </button>
+                )}
+                {rfq.status === 'pending' && (
+                  <button 
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedRFQ(rfq.id);
+                      setShowCreateQuote(true);
+                    }}
+                  >
+                    Send Quote
+                  </button>
+                )}
+                {rfq.status === 'quoted' && (
+                  <button 
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowViewQuote(rfq.id);
+                    }}
+                  >
+                    View Quote
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Create Quote Modal */}
+      {showCreateQuote && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">Create Quote</h3>
+              <button onClick={() => setShowCreateQuote(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Price</label>
+                <input
+                  type="number"
+                  placeholder="Enter price"
+                  value={quoteData.price}
+                  onChange={(e) => setQuoteData({...quoteData, price: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Quantity</label>
+                <input
+                  type="number"
+                  placeholder="Enter quantity"
+                  value={quoteData.quantity}
+                  onChange={(e) => setQuoteData({...quoteData, quantity: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Validity</label>
+                <select
+                  value={quoteData.validity}
+                  onChange={(e) => setQuoteData({...quoteData, validity: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                >
+                  <option value="7 days">7 days</option>
+                  <option value="15 days">15 days</option>
+                  <option value="30 days">30 days</option>
+                  <option value="60 days">60 days</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Notes</label>
+                <textarea
+                  placeholder="Add any additional notes..."
+                  value={quoteData.notes}
+                  onChange={(e) => setQuoteData({...quoteData, notes: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 h-24"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowCreateQuote(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  alert(`Quote created successfully!\nPrice: $${quoteData.price}\nQuantity: ${quoteData.quantity}\nValidity: ${quoteData.validity}`);
+                  setShowCreateQuote(false);
+                  setQuoteData({ price: '', quantity: '', validity: '30 days', notes: '' });
+                }}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+              >
+                Create Quote
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Respond to RFQ Modal */}
+      {showRespondRFQ && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">Respond to RFQ</h3>
+              <button onClick={() => setShowRespondRFQ(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Your Message</label>
+                <textarea
+                  placeholder="Enter your response message..."
+                  value={responseData.message}
+                  onChange={(e) => setResponseData({...responseData, message: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 h-32"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Suggested Price</label>
+                  <input
+                    type="number"
+                    placeholder="Enter price"
+                    value={responseData.suggestedPrice}
+                    onChange={(e) => setResponseData({...responseData, suggestedPrice: e.target.value})}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Quantity</label>
+                  <input
+                    type="number"
+                    placeholder="Qty"
+                    value={responseData.quantity}
+                    onChange={(e) => setResponseData({...responseData, quantity: e.target.value})}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowRespondRFQ(null)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  alert(`Response sent successfully!\nPrice: $${responseData.suggestedPrice}\nQuantity: ${responseData.quantity}`);
+                  setShowRespondRFQ(null);
+                  setResponseData({ message: '', suggestedPrice: '', quantity: '' });
+                }}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+              >
+                Send Response
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Quote Modal */}
+      {showViewQuote && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">Quote Details</h3>
+              <button onClick={() => setShowViewQuote(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-green-50 rounded-xl p-4">
+                <p className="text-sm text-gray-500 mb-1">Quote Status</p>
+                <p className="text-green-700 font-bold">Sent - Awaiting Response</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Price</p>
+                  <p className="text-lg font-bold text-blue-600">$125,000</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Quantity</p>
+                  <p className="text-lg font-bold">3 units</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Validity Period</p>
+                <p className="font-semibold">30 days (expires in 15 days)</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Notes</p>
+                <p className="text-sm">Price includes standard warranty and installation support. Payment terms: 30% deposit, 70% on delivery.</p>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowViewQuote(null)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  alert('Quote withdrawn successfully');
+                  setShowViewQuote(null);
+                }}
+                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition"
+              >
+                Withdraw Quote
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1314,6 +2332,67 @@ function RevenueTab() {
 
 function PaymentsTab() {
   const [activePaymentSection, setActivePaymentSection] = useState<'overview' | 'withdrawal' | 'methods' | 'invoices'>('overview');
+  const [showAddPaymentMethod, setShowAddPaymentMethod] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState([
+    {
+      id: '1',
+      type: 'bank',
+      name: 'Industrial & Commercial Bank',
+      lastFour: '5678',
+      accountName: 'Guangzhou Precision Mfg',
+      swiftCode: 'ICBKCNBJ',
+      isPrimary: true
+    },
+    {
+      id: '2',
+      type: 'alipay',
+      name: 'Alipay',
+      lastFour: '8901',
+      isPrimary: false
+    }
+  ]);
+  const [newPaymentMethod, setNewPaymentMethod] = useState({
+    type: 'bank',
+    name: '',
+    accountNumber: '',
+    accountName: '',
+    swiftCode: '',
+    isPrimary: false
+  });
+  
+  const handleAddPaymentMethod = () => {
+    setShowAddPaymentMethod(true);
+  };
+
+  const handleAddPaymentMethodSubmit = () => {
+    // Generate a new ID for the payment method
+    const newId = (paymentMethods.length + 1).toString();
+    
+    // Create the new payment method object
+    const paymentMethod = {
+      id: newId,
+      type: newPaymentMethod.type,
+      name: newPaymentMethod.name,
+      lastFour: newPaymentMethod.accountNumber.slice(-4),
+      accountName: newPaymentMethod.accountName,
+      swiftCode: newPaymentMethod.swiftCode,
+      isPrimary: newPaymentMethod.isPrimary
+    };
+    
+    // Add the new payment method to the list
+    setPaymentMethods([...paymentMethods, paymentMethod]);
+    
+    // Close the modal and reset the form
+    setShowAddPaymentMethod(false);
+    setNewPaymentMethod({
+      type: 'bank',
+      name: '',
+      accountNumber: '',
+      accountName: '',
+      swiftCode: '',
+      isPrimary: false
+    });
+  };
 
   return (
     <div>
@@ -1573,7 +2652,10 @@ function PaymentsTab() {
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">Payment Methods</h2>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            <button 
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              onClick={handleAddPaymentMethod}
+            >
               <Plus className="w-4 h-4" />
               Add Method
             </button>
@@ -1675,6 +2757,99 @@ function PaymentsTab() {
             <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p>No subscription invoices yet</p>
             <p className="text-sm">Upgrade to a paid plan to start receiving invoices</p>
+          </div>
+        </div>
+      )}
+
+      {/* Add Payment Method Modal */}
+      {showAddPaymentMethod && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">Add Payment Method</h3>
+              <button onClick={() => setShowAddPaymentMethod(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Payment Type</label>
+                <select
+                  value={newPaymentMethod.type}
+                  onChange={(e) => setNewPaymentMethod({...newPaymentMethod, type: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                >
+                  <option value="bank">Bank Transfer</option>
+                  <option value="alipay">Alipay</option>
+                  <option value="wechat">WeChat Pay</option>
+                  <option value="swift">International SWIFT</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Bank/Service Name</label>
+                <input
+                  type="text"
+                  placeholder="Enter bank or service name"
+                  value={newPaymentMethod.name}
+                  onChange={(e) => setNewPaymentMethod({...newPaymentMethod, name: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Account Number</label>
+                <input
+                  type="text"
+                  placeholder="Enter account number"
+                  value={newPaymentMethod.accountNumber}
+                  onChange={(e) => setNewPaymentMethod({...newPaymentMethod, accountNumber: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Account Name</label>
+                <input
+                  type="text"
+                  placeholder="Enter account name"
+                  value={newPaymentMethod.accountName}
+                  onChange={(e) => setNewPaymentMethod({...newPaymentMethod, accountName: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">SWIFT Code (if applicable)</label>
+                <input
+                  type="text"
+                  placeholder="Enter SWIFT code"
+                  value={newPaymentMethod.swiftCode}
+                  onChange={(e) => setNewPaymentMethod({...newPaymentMethod, swiftCode: e.target.value})}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="primary"
+                  checked={newPaymentMethod.isPrimary}
+                  onChange={(e) => setNewPaymentMethod({...newPaymentMethod, isPrimary: e.target.checked})}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="primary" className="ml-2 text-sm text-gray-700">Set as primary payment method</label>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowAddPaymentMethod(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddPaymentMethodSubmit}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+              >
+                Add Payment Method
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1857,34 +3032,34 @@ function AdvertisementsTab() {
       </div>
 
       {/* Ads Table */}
-      <div className="bg-white rounded-2xl shadow-sm">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Campaign Details</h2>
+      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">Campaign Details</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[1000px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Impressions</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clicks</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">New Clients</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ROI</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Impressions</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clicks</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">New Clients</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ROI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {ads.map((ad) => (
                 <tr key={ad.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <div>
-                      <p className="font-medium text-gray-900">{ad.title}</p>
-                      <p className="text-sm text-gray-500">ID: {ad.id}</p>
+                      <p className="font-medium text-gray-900 text-xs">{ad.title}</p>
+                      <p className="text-xs text-gray-500">ID: {ad.id}</p>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(ad.status)}`}>
                       {getStatusText(ad.status)}
                     </span>
@@ -1892,7 +3067,7 @@ function AdvertisementsTab() {
                       <p className="text-xs text-red-600 mt-1">{ad.rejectionReason}</p>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-4 py-3 text-xs text-gray-900 whitespace-nowrap">
                     {new Date(ad.submittedDate).toLocaleDateString()}
                     {ad.approvedDate && (
                       <p className="text-xs text-green-600 mt-1">
@@ -1900,12 +3075,12 @@ function AdvertisementsTab() {
                       </p>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{ad.impressions.toLocaleString()}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{ad.clicks.toLocaleString()}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{ad.conversions}</td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">${ad.revenue.toLocaleString()}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={`font-medium ${ad.roi > 0 ? 'text-green-600' : 'text-gray-500'}`}>
+                  <td className="px-4 py-3 text-xs text-gray-900 text-right">{ad.impressions.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-xs text-gray-900 text-right">{ad.clicks.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-xs text-gray-900 text-right">{ad.conversions}</td>
+                  <td className="px-4 py-3 text-xs font-medium text-gray-900 text-right">${ad.revenue.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-xs text-right">
+                    <span className={`font-semibold ${ad.roi > 0 ? 'text-green-600' : 'text-gray-400'}`}>
                       {ad.roi > 0 ? `${ad.roi}%` : '-'}
                     </span>
                   </td>
@@ -1930,6 +3105,7 @@ function AdvertisementsTab() {
 
 function SettingsTab() {
   const [activeSection, setActiveSection] = useState('profile');
+  
   const [profile, setProfile] = useState({
     companyName: 'Guangzhou Precision Mfg',
     contactPerson: 'Li Wei',
@@ -1991,7 +3167,12 @@ function SettingsTab() {
     shippingRegions: ['Global', 'Asia', 'Africa', 'Europe'],
     defaultShippingMethod: 'Sea Freight',
     expressShipping: true,
-    trackingIntegration: true
+    trackingIntegration: true,
+    fobPrice: '',
+    fobCurrency: 'USD',
+    cifPrice: '',
+    cifCurrency: 'USD',
+    showFobCif: true
   });
 
   const sections = [
@@ -2023,7 +3204,7 @@ function SettingsTab() {
     setIntegrationSettings(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleShippingChange = (key: string, value: boolean | string | string[]) => {
+  const handleShippingChange = (key: string, value: boolean | string | string[] | number) => {
     setShippingSettings(prev => ({ ...prev, [key]: value }));
   };
 
@@ -2578,6 +3759,95 @@ function SettingsTab() {
                     <option value="Express Courier">Express Courier</option>
                   </select>
                 </div>
+
+                {/* FOB/CIF Price Settings */}
+                <div className="border-t border-gray-200 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">FOB / CIF Pricing</h3>
+                  <p className="text-sm text-gray-500 mb-4">Set your FOB (Free on Board) and CIF (Cost, Insurance, and Freight) prices so clients can see the actual costs involved.</p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* FOB Price */}
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">FOB Price</label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <span className="absolute left-3 top-3.5 text-gray-500 text-sm">$</span>
+                            <input
+                              type="number"
+                              placeholder="0.00"
+                              value={shippingSettings.fobPrice}
+                              onChange={(e) => handleShippingChange('fobPrice', e.target.value)}
+                              className="w-full border border-gray-300 rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                            />
+                          </div>
+                          <select
+                            value={shippingSettings.fobCurrency}
+                            onChange={(e) => handleShippingChange('fobCurrency', e.target.value)}
+                            className="border border-gray-300 rounded-xl px-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+                          >
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="GBP">GBP</option>
+                            <option value="CNY">CNY</option>
+                            <option value="JPY">JPY</option>
+                          </select>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Price excluding shipping costs</p>
+                      </div>
+                    </div>
+
+                    {/* CIF Price */}
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">CIF Price</label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <span className="absolute left-3 top-3.5 text-gray-500 text-sm">$</span>
+                            <input
+                              type="number"
+                              placeholder="0.00"
+                              value={shippingSettings.cifPrice}
+                              onChange={(e) => handleShippingChange('cifPrice', e.target.value)}
+                              className="w-full border border-gray-300 rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                            />
+                          </div>
+                          <select
+                            value={shippingSettings.cifCurrency}
+                            onChange={(e) => handleShippingChange('cifCurrency', e.target.value)}
+                            className="border border-gray-300 rounded-xl px-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+                          >
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="GBP">GBP</option>
+                            <option value="CNY">CNY</option>
+                            <option value="JPY">JPY</option>
+                          </select>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Price including insurance and freight</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Price Breakdown Info */}
+                  <div className="mt-4 p-4 bg-blue-50 rounded-xl">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-blue-600 font-bold text-sm">i</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-blue-900">Understanding FOB vs CIF</p>
+                        <p className="text-xs text-blue-700 mt-1">
+                          <strong>FOB (Free on Board):</strong> The seller delivers the goods on board the vessel. The buyer bears all costs and risks of the goods from that point.
+                        </p>
+                        <p className="text-xs text-blue-700 mt-1">
+                          <strong>CIF (Cost, Insurance, and Freight):</strong> The seller delivers the goods on board the vessel, pays costs of freight and insurance to bring the goods to the destination port.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-between">
                   <div>
                     <label className="font-medium text-gray-900">Express Shipping</label>
