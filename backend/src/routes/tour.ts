@@ -3,12 +3,21 @@ import Tour from '../models/Tour.js';
 
 const router = express.Router();
 
+// Helper for pagination
+const getPagination = (query: any) => {
+  const page = parseInt(query.page) || 1;
+  const limit = Math.min(parseInt(query.limit) || 20, 100);
+  const skip = (page - 1) * limit;
+  return { page, limit, skip };
+};
+
 // @route   GET /api/tours
 // @desc    Get all tours
 // @access  Public
 router.get('/', async (req, res) => {
   try {
     const { category, location, minPrice, maxPrice, sort } = req.query;
+    const { page, limit, skip } = getPagination(req.query);
 
     let query: any = {};
 
@@ -43,17 +52,30 @@ router.get('/', async (req, res) => {
       sortQuery.createdAt = -1;
     }
 
-    const tours = await Tour.find(query).sort(sortQuery).populate('partnerId');
+    const tours = await Tour.find(query)
+      .sort(sortQuery)
+      .populate('partnerId')
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Tour.countDocuments(query);
 
     res.status(200).json({
       success: true,
       message: 'Tours retrieved successfully',
       data: {
-        tours
+        tours,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
       }
     });
   } catch (error: any) {
     res.status(500).json({
+      success: false,
       error: {
         message: error.message || 'Server error',
         status: 500
@@ -67,7 +89,10 @@ router.get('/', async (req, res) => {
 // @access  Public
 router.get('/featured', async (req, res) => {
   try {
-    const tours = await Tour.find({ isFeatured: true }).populate('partnerId');
+    const { limit } = getPagination(req.query);
+    const tours = await Tour.find({ isFeatured: true })
+      .populate('partnerId')
+      .limit(limit);
 
     res.status(200).json({
       success: true,
@@ -78,6 +103,7 @@ router.get('/featured', async (req, res) => {
     });
   } catch (error: any) {
     res.status(500).json({
+      success: false,
       error: {
         message: error.message || 'Server error',
         status: 500
@@ -95,6 +121,7 @@ router.get('/:id', async (req, res) => {
 
     if (!tour) {
       return res.status(404).json({
+        success: false,
         error: {
           message: 'Tour not found',
           status: 404
@@ -115,6 +142,7 @@ router.get('/:id', async (req, res) => {
     });
   } catch (error: any) {
     res.status(500).json({
+      success: false,
       error: {
         message: error.message || 'Server error',
         status: 500

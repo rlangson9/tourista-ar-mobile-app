@@ -231,53 +231,46 @@ router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
     // Check if user exists
     const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: 'User does not exist',
-          status: 400
+    // Always return success to prevent user enumeration
+    // Email will only be sent if user exists
+    if (user) {
+      // Create reset token
+      const resetToken = uuidv4();
+      const resetPasswordExpire = Date.now() + 3600000; // 1 hour
+
+      user.resetPasswordToken = resetToken;
+      user.resetPasswordExpire = resetPasswordExpire;
+      await user.save();
+
+      // Send reset email
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT as string),
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
         }
+      });
+
+      const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: user.email,
+        subject: 'Reset your password',
+        html: `
+          <h1>Password Reset</h1>
+          <p>Click the link below to reset your password:</p>
+          <a href="${resetUrl}">Reset Password</a>
+        `
       });
     }
 
-    // Create reset token
-    const resetToken = uuidv4();
-    const resetPasswordExpire = Date.now() + 3600000; // 1 hour
-
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpire = resetPasswordExpire;
-    await user.save();
-
-    // Send reset email
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT as string),
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    });
-
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-
-    await transporter.sendMail({
-      from: process.env.SMTP_USER,
-      to: user.email,
-      subject: 'Reset your password',
-      html: `
-        <h1>Password Reset</h1>
-        <p>Click the link below to reset your password:</p>
-        <a href="${resetUrl}">Reset Password</a>
-      `
-    });
-
+    // Always return same message regardless of whether user exists
     res.status(200).json({
       success: true,
-      message: 'Reset password email sent',
-      data: {
-        email: user.email
-      }
+      message: 'If an account exists with this email, a reset link has been sent',
+      data: {}
     });
   } catch (error: any) {
     res.status(500).json({

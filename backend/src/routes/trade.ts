@@ -3,12 +3,21 @@ import Product from '../models/Product.js';
 
 const router = express.Router();
 
+// Helper for pagination
+const getPagination = (query: any) => {
+  const page = parseInt(query.page) || 1;
+  const limit = Math.min(parseInt(query.limit) || 20, 100);
+  const skip = (page - 1) * limit;
+  return { page, limit, skip };
+};
+
 // @route   GET /api/trade/products
 // @desc    Get all products
 // @access  Public
 router.get('/products', async (req, res) => {
   try {
     const { category, minPrice, maxPrice, sort } = req.query;
+    const { page, limit, skip } = getPagination(req.query);
 
     let query: any = {};
 
@@ -39,17 +48,30 @@ router.get('/products', async (req, res) => {
       sortQuery.createdAt = -1;
     }
 
-    const products = await Product.find(query).sort(sortQuery).populate('supplierId');
+    const products = await Product.find(query)
+      .sort(sortQuery)
+      .populate('supplierId')
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Product.countDocuments(query);
 
     res.status(200).json({
       success: true,
       message: 'Products retrieved successfully',
       data: {
-        products
+        products,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
       }
     });
   } catch (error: any) {
     res.status(500).json({
+      success: false,
       error: {
         message: error.message || 'Server error',
         status: 500
@@ -63,7 +85,10 @@ router.get('/products', async (req, res) => {
 // @access  Public
 router.get('/products/featured', async (req, res) => {
   try {
-    const products = await Product.find({ isFeatured: true }).populate('supplierId');
+    const { limit } = getPagination(req.query);
+    const products = await Product.find({ isFeatured: true })
+      .populate('supplierId')
+      .limit(limit);
 
     res.status(200).json({
       success: true,
@@ -74,6 +99,7 @@ router.get('/products/featured', async (req, res) => {
     });
   } catch (error: any) {
     res.status(500).json({
+      success: false,
       error: {
         message: error.message || 'Server error',
         status: 500
@@ -91,6 +117,7 @@ router.get('/products/:id', async (req, res) => {
 
     if (!product) {
       return res.status(404).json({
+        success: false,
         error: {
           message: 'Product not found',
           status: 404
@@ -111,6 +138,7 @@ router.get('/products/:id', async (req, res) => {
     });
   } catch (error: any) {
     res.status(500).json({
+      success: false,
       error: {
         message: error.message || 'Server error',
         status: 500
