@@ -20,6 +20,7 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChange, isAssistantOpen, onToggleAssistant, darkMode, onToggleDarkMode }: HomeScreenProps) {
+  console.log('HomeScreen props - isAssistantOpen:', isAssistantOpen, 'onToggleAssistant:', typeof onToggleAssistant);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
@@ -662,6 +663,7 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
 
 
       {/* AI Assistant Button */}
+      {console.log('HomeScreen rendering AIButton, isAssistantOpen:', isAssistantOpen)}
       <AIButton onOpen={onToggleAssistant} isAssistantOpen={isAssistantOpen} />
     </div>
   );

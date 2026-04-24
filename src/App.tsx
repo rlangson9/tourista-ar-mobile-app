@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Onboarding } from './components/Onboarding';
 import { HomeScreen } from './components/HomeScreen';
 import { ExploreScreen } from './components/ExploreScreen';
@@ -49,6 +49,18 @@ export default function App() {
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [hasSelectedRole, setHasSelectedRole] = useState(false);
+
+  // Listen for openAIAssistant custom event from other components
+  useEffect(() => {
+    const handleOpenAIAssistant = () => {
+      setShowAIAssistant(true);
+    };
+
+    window.addEventListener('openAIAssistant', handleOpenAIAssistant);
+    return () => {
+      window.removeEventListener('openAIAssistant', handleOpenAIAssistant);
+    };
+  }, []);
 
   const handleNavigate = (screen: Screen, itemId?: string) => {
     if (itemId) {
@@ -144,6 +156,10 @@ export default function App() {
               onSwitchToPartner={switchToPartnerDashboard}
               appMode={appMode}
               onModeChange={setAppMode}
+              isAssistantOpen={showAIAssistant}
+              onToggleAssistant={() => setShowAIAssistant(!showAIAssistant)}
+              darkMode={false}
+              onToggleDarkMode={() => {}}
             />
           )}
 

@@ -127,29 +127,36 @@ export function AIButton({ onOpen, isAssistantOpen }: AIButtonProps) {
     }
   }, [isDragging]);
 
+  console.log('AIButton render - isAssistantOpen:', isAssistantOpen, 'position:', position);
+
   return (
     <>
       {!isAssistantOpen && (
-        <motion.div
-          ref={buttonRef}
-          style={{
-            position: 'fixed',
-            left: position.x,
-            top: position.y,
-            zIndex: 1000,
-            cursor: isDragging ? 'grabbing' : 'grab'
-          }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
-          onClick={() => !hasDragged.current && onOpen()}
-          className="w-14 h-14 bg-amber-500 rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
-          aria-label="Touri ai"
-        >
-          <Bot className="w-7 h-7 text-white" />
-        </motion.div>
+        <>
+          <div
+            style={{
+              position: 'fixed',
+              left: position.x,
+              top: position.y,
+              zIndex: 9999,
+              width: '56px',
+              height: '56px',
+              backgroundColor: '#f59e0b',
+              borderRadius: '9999px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              console.log('AI Button clicked!');
+              onOpen();
+            }}
+          >
+            <Bot className="w-7 h-7 text-white" />
+          </div>
+        </>
       )}
     </>
   );
