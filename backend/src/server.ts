@@ -16,6 +16,7 @@ import adminRoutes from './routes/admin.js';
 import messageRoutes from './routes/message.js';
 import paymentRoutes from './routes/payment.js';
 import bookingRoutes from './routes/booking.js';
+import uploadRoutes from './routes/upload.js';
 
 // Load environment variables
 dotenv.config();
@@ -35,8 +36,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health check route
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     message: 'Tourista AR Backend is running',
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     mode: mongoose.connection.readyState === 1 ? 'full' : 'limited'
@@ -54,6 +55,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/uploads', uploadRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

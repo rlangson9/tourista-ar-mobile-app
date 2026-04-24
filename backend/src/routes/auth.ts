@@ -3,13 +3,15 @@ import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import { v4 as uuidv4 } from 'uuid';
+import { registerValidation, loginValidation } from '../middleware/validation.js';
+import { registerLimiter, loginLimiter, passwordResetLimiter } from '../middleware/rateLimit.js';
 
 const router = express.Router();
 
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
-router.post('/register', async (req, res) => {
+router.post('/register', registerLimiter, registerValidation, async (req, res) => {
   try {
     const { name, email, password, phone, country, role } = req.body;
 
@@ -18,6 +20,7 @@ router.post('/register', async (req, res) => {
 
     if (userExists) {
       return res.status(400).json({
+        success: false,
         error: {
           message: 'User already exists',
           status: 400
@@ -85,6 +88,7 @@ router.post('/register', async (req, res) => {
     });
   } catch (error: any) {
     res.status(500).json({
+      success: false,
       error: {
         message: error.message || 'Server error',
         status: 500
@@ -96,7 +100,7 @@ router.post('/register', async (req, res) => {
 // @route   POST /api/auth/login
 // @desc    Login user
 // @access  Public
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, loginValidation, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -105,6 +109,7 @@ router.post('/login', async (req, res) => {
 
     if (!user) {
       return res.status(400).json({
+        success: false,
         error: {
           message: 'Invalid email or password',
           status: 400
@@ -117,6 +122,7 @@ router.post('/login', async (req, res) => {
 
     if (!isMatch) {
       return res.status(400).json({
+        success: false,
         error: {
           message: 'Invalid email or password',
           status: 400
@@ -147,6 +153,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (error: any) {
     res.status(500).json({
+      success: false,
       error: {
         message: error.message || 'Server error',
         status: 500
@@ -164,6 +171,7 @@ router.get('/verify-email', async (req, res) => {
 
     if (!token) {
       return res.status(400).json({
+        success: false,
         error: {
           message: 'No verification token provided',
           status: 400
@@ -176,6 +184,7 @@ router.get('/verify-email', async (req, res) => {
 
     if (!user) {
       return res.status(400).json({
+        success: false,
         error: {
           message: 'Invalid verification token',
           status: 400
@@ -203,6 +212,7 @@ router.get('/verify-email', async (req, res) => {
     });
   } catch (error: any) {
     res.status(500).json({
+      success: false,
       error: {
         message: error.message || 'Server error',
         status: 500
@@ -214,7 +224,7 @@ router.get('/verify-email', async (req, res) => {
 // @route   POST /api/auth/forgot-password
 // @desc    Forgot password
 // @access  Public
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -223,6 +233,7 @@ router.post('/forgot-password', async (req, res) => {
 
     if (!user) {
       return res.status(400).json({
+        success: false,
         error: {
           message: 'User does not exist',
           status: 400
@@ -270,6 +281,7 @@ router.post('/forgot-password', async (req, res) => {
     });
   } catch (error: any) {
     res.status(500).json({
+      success: false,
       error: {
         message: error.message || 'Server error',
         status: 500
@@ -281,7 +293,7 @@ router.post('/forgot-password', async (req, res) => {
 // @route   POST /api/auth/reset-password
 // @desc    Reset password
 // @access  Public
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', passwordResetLimiter, async (req, res) => {
   try {
     const { token, password } = req.body;
 
@@ -293,6 +305,7 @@ router.post('/reset-password', async (req, res) => {
 
     if (!user) {
       return res.status(400).json({
+        success: false,
         error: {
           message: 'Invalid or expired reset token',
           status: 400
@@ -319,6 +332,7 @@ router.post('/reset-password', async (req, res) => {
     });
   } catch (error: any) {
     res.status(500).json({
+      success: false,
       error: {
         message: error.message || 'Server error',
         status: 500
