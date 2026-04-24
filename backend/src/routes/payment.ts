@@ -1,6 +1,8 @@
 import express from 'express';
 import { protect } from '../middleware/auth.js';
 import stripe from 'stripe';
+import Booking from '../models/Booking.js';
+import Order from '../models/Order.js';
 
 const router = express.Router();
 const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY as string, {
@@ -12,14 +14,16 @@ const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY as string, {
 // @access  Private
 router.post('/intent', protect, async (req, res) => {
   try {
-    const { amount, currency, description } = req.body;
+    const { amount, currency, description, bookingId, orderId } = req.body;
 
     const paymentIntent = await stripeInstance.paymentIntents.create({
       amount: amount * 100, // Convert to cents
       currency: currency || 'usd',
       description: description || 'Tourista AR Payment',
       metadata: {
-        userId: req.user.id
+        userId: req.user.id,
+        bookingId: bookingId || '',
+        orderId: orderId || ''
       }
     });
 
@@ -57,10 +61,41 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       case 'payment_intent.succeeded':
         const paymentIntent = event.data.object;
         // Update order/booking status
+        const { bookingId, orderId, userId } = paymentIntent.metadata;
+        
+        if (bookingId) {
+          await Booking.findByIdAndUpdate(bookingId, {
+            paymentStatus: 'paid',
+            transactionId: paymentIntent.id,
+            status: 'confirmed'
+          });
+        }
+        
+        if (orderId) {
+          await Order.findByIdAndUpdate(orderId, {
+            paymentStatus: 'paid',
+            transactionId: paymentIntent.id,
+            status: 'processing'
+          });
+        }
         break;
       case 'payment_intent.payment_failed':
         const failedPaymentIntent = event.data.object;
-        // Handle failed payment
+        const { bookingId: failedBookingId, orderId: failedOrderId } = failedPaymentIntent.metadata;
+        
+        if (failedBookingId) {
+          await Booking.findByIdAndUpdate(failedBookingId, {
+            paymentStatus: 'pending',
+            status: 'pending'
+          });
+        }
+        
+        if (failedOrderId) {
+          await Order.findByIdAndUpdate(failedOrderId, {
+            paymentStatus: 'pending',
+            status: 'pending'
+          });
+        }
         break;
       default:
         console.log(`Unhandled event type ${event.type}`);

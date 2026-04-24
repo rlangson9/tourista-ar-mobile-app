@@ -101,10 +101,22 @@ router.get('/:conversationId', protect, async (req, res) => {
 // @access  Private
 router.post('/', protect, async (req, res) => {
   try {
-    const { receiverId, content, type, attachments } = req.body;
+    const { receiverId, content, type, attachments, existingConversationId } = req.body;
 
-    // Generate conversation ID if it doesn't exist
-    const conversationId = uuidv4();
+    // Generate conversation ID or use existing one
+    let conversationId = existingConversationId;
+    
+    // If no existing conversation ID, check if there's an existing conversation between these users
+    if (!conversationId) {
+      const existingMessage = await Message.findOne({
+        $or: [
+          { senderId: req.user.id, receiverId: receiverId },
+          { senderId: receiverId, receiverId: req.user.id }
+        ]
+      }).sort({ createdAt: -1 });
+
+      conversationId = existingMessage?.conversationId || uuidv4();
+    }
 
     const message = await Message.create({
       senderId: req.user.id,

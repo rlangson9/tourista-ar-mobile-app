@@ -15,6 +15,7 @@ import tradeRoutes from './routes/trade.js';
 import adminRoutes from './routes/admin.js';
 import messageRoutes from './routes/message.js';
 import paymentRoutes from './routes/payment.js';
+import bookingRoutes from './routes/booking.js';
 
 // Load environment variables
 dotenv.config();
@@ -52,6 +53,7 @@ app.use('/api/trade', tradeRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
