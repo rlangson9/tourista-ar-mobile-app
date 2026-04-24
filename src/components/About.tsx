@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { ArrowLeft, Mail, Globe, Phone, MapPin, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
 import touristaLogo from '/TOURISTA AR 2.png';
 import type { Screen } from '../App';
 
@@ -10,7 +9,7 @@ interface AboutProps {
 }
 
 export function About({ onNavigate, language }: AboutProps) {
-  const activeLanguage = language === 'zh' ? 'zh' : 'en';
+  const [activeLanguage, setActiveLanguage] = useState(language === 'zh' ? 'zh' : 'en');
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
