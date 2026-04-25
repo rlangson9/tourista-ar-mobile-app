@@ -48,6 +48,11 @@ const messageSchema = new mongoose.Schema<MessageDocument>({
   timestamps: true,
 });
 
+// Add indexes for better query performance
+messageSchema.index({ conversationId: 1 });
+messageSchema.index({ senderId: 1, receiverId: 1 });
+messageSchema.index({ receiverId: 1, isRead: 1 });
+
 const Message = mongoose.model<MessageDocument>('Message', messageSchema);
 
 export default Message;

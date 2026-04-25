@@ -50,7 +50,7 @@ const mockAds: AdData[] = [
     advertiser: 'Premium Tours Ltd',
     category: 'tourism',
     type: 'banner',
-    targetUrl: '/tour-details/beijing-luxury',
+    targetUrl: '/tour-details/1',
     ctaText: 'Book Now',
     budget: 5000,
     status: 'active',
@@ -281,11 +281,11 @@ export function AdDisplay({
                 </button>
               </div>
               
-              <h3 className="text-xl font-bold mb-2">{currentAd.title}</h3>
-              <p className="text-sm text-white/90 mb-3 line-clamp-2">{currentAd.description}</p>
+              <h3 className="text-xl font-bold mb-2 text-white">{currentAd.title}</h3>
+              <p className="text-sm text-white mb-3 line-clamp-2">{currentAd.description}</p>
               
               <div className="flex items-center justify-between">
-                <div className="text-xs text-white/70">
+                <div className="text-xs text-white">
                   by {currentAd.advertiser}
                 </div>
                 <button className="bg-white text-gray-900 px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-100 transition">

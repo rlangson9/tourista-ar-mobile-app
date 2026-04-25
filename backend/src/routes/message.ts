@@ -2,6 +2,8 @@ import express from 'express';
 import { protect } from '../middleware/auth.js';
 import Message from '../models/Message.js';
 import { v4 as uuidv4 } from 'uuid';
+import { messageValidation } from '../middleware/validation.js';
+import { messageLimiter } from '../middleware/rateLimit.js';
 
 const router = express.Router();
 
@@ -63,6 +65,25 @@ router.get('/conversations', protect, async (req, res) => {
 // @access  Private
 router.get('/:conversationId', protect, async (req, res) => {
   try {
+    // Check if user is part of the conversation
+    const conversationCheck = await Message.findOne({
+      conversationId: req.params.conversationId,
+      $or: [
+        { senderId: req.user.id },
+        { receiverId: req.user.id }
+      ]
+    });
+
+    if (!conversationCheck) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          message: 'Not authorized to access this conversation',
+          status: 403
+        }
+      });
+    }
+
     const messages = await Message.find({
       conversationId: req.params.conversationId
     }).sort({ createdAt: 1 }).populate('senderId receiverId');
@@ -99,7 +120,7 @@ router.get('/:conversationId', protect, async (req, res) => {
 // @route   POST /api/messages
 // @desc    Send a message
 // @access  Private
-router.post('/', protect, async (req, res) => {
+router.post('/', protect, messageLimiter, messageValidation, async (req, res) => {
   try {
     const { receiverId, content, type, attachments, existingConversationId } = req.body;
 

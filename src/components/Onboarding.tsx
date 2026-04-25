@@ -166,7 +166,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   };
 
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 flex flex-col" style={{ maxWidth: '100%', width: '100%', height: '100vh', margin: 0, padding: 0 }}>
       <AnimatePresence mode="wait">
         {/* Step 0: Welcome */}
         {step === 0 && (
@@ -176,6 +176,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="flex-1 flex flex-col items-center justify-center p-6 text-white text-center"
+            style={{ minHeight: '100vh' }}
           >
             <motion.div
               initial={{ scale: 0.5 }}

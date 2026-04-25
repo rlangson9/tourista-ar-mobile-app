@@ -96,6 +96,11 @@ userSchema.methods.comparePassword = async function (password: string): Promise<
   return await bcrypt.compare(password, this.password);
 };
 
+// Add indexes for better query performance
+userSchema.index({ email: 1 });
+userSchema.index({ role: 1 });
+userSchema.index({ isVerified: 1 });
+
 const User = mongoose.model<UserDocument>('User', userSchema);
 
 export default User;

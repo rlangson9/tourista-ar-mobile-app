@@ -79,6 +79,13 @@ const orderSchema = new mongoose.Schema<OrderDocument>({
   timestamps: true,
 });
 
+// Add indexes for better query performance
+orderSchema.index({ userId: 1 });
+orderSchema.index({ supplierId: 1 });
+orderSchema.index({ status: 1 });
+orderSchema.index({ paymentStatus: 1 });
+orderSchema.index({ orderDate: 1 });
+
 const Order = mongoose.model<OrderDocument>('Order', orderSchema);
 
 export default Order;

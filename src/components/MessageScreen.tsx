@@ -7,6 +7,9 @@ interface MessageScreenProps {
   onNavigate: (screen: Screen) => void;
   partnerId?: string;
   partnerName?: string;
+  previousScreen?: Screen;
+  productId?: string;
+  tourId?: string;
 }
 
 // Mock messages for demonstration
@@ -26,7 +29,7 @@ const mockMessages: { [key: string]: Array<{
   ],
 };
 
-export function MessageScreen({ onNavigate, partnerId = 'p1', partnerName = 'China Elite Tours' }: MessageScreenProps) {
+export function MessageScreen({ onNavigate, partnerId = 'p1', partnerName = 'China Elite Tours', previousScreen = 'tour-details', productId, tourId }: MessageScreenProps) {
   const [messages, setMessages] = useState(mockMessages[partnerId] || []);
   const [inputText, setInputText] = useState('');
   const [showMediaOptions, setShowMediaOptions] = useState(false);
@@ -68,7 +71,7 @@ export function MessageScreen({ onNavigate, partnerId = 'p1', partnerName = 'Chi
       {/* Header */}
       <div className="bg-white border-b border-gray-200 p-4 flex items-center gap-3">
         <button 
-          onClick={() => onNavigate('tour-details')}
+          onClick={() => onNavigate(previousScreen, previousScreen === 'trade-product-detail' ? productId : tourId)}
           className="p-2 rounded-full hover:bg-gray-100 transition"
         >
           <ArrowLeft className="w-5 h-5" />

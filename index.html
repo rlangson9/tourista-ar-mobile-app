@@ -22,7 +22,7 @@
       #root {
         width: 100%;
         height: 100vh;
-        scroll-padding-top: 120px;
+        scroll-padding-top: 0;
         scroll-snap-type: y proximity;
         overflow-y: auto;
         background-color: #f9fafb;
@@ -51,14 +51,14 @@
         }
         
         body {
-          padding-top: max(env(safe-area-inset-top), 120px) !important;
+          padding-top: env(safe-area-inset-top) !important;
         }
         
         #root {
           width: 100%;
           max-width: 100%;
           height: 100vh;
-          padding-top: max(env(safe-area-inset-top), 120px) !important;
+          padding-top: 0 !important;
           overflow-y: auto;
           background-color: #f9fafb;
         }

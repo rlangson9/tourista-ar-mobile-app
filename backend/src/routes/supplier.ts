@@ -3,13 +3,14 @@ import { protect, supplier } from '../middleware/auth.js';
 import Supplier from '../models/Supplier.js';
 import Product from '../models/Product.js';
 import Order from '../models/Order.js';
+import { supplierValidation, productValidation } from '../middleware/validation.js';
 
 const router = express.Router();
 
 // @route   POST /api/suppliers/profile
 // @desc    Create or update supplier profile
 // @access  Private (Supplier only)
-router.post('/profile', protect, supplier, async (req, res) => {
+router.post('/profile', protect, supplier, supplierValidation, async (req, res) => {
   try {
     const { 
       companyName, 
@@ -124,7 +125,7 @@ router.get('/profile', protect, supplier, async (req, res) => {
 // @route   POST /api/suppliers/products
 // @desc    Create a new product
 // @access  Private (Supplier only)
-router.post('/products', protect, supplier, async (req, res) => {
+router.post('/products', protect, supplier, productValidation, async (req, res) => {
   try {
     const supplierProfile = await Supplier.findOne({ userId: req.user.id });
 

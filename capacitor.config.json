@@ -1,0 +1,13 @@
+{
+  "appId": "com.tourista.ar",
+  "appName": "Tourista AR",
+  "webDir": "build",
+  "bundledWebRuntime": false,
+  "ios": {
+    "scheme": "touristaar",
+    "supportsTablet": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

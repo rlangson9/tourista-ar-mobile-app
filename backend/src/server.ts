@@ -17,6 +17,10 @@ import messageRoutes from './routes/message.js';
 import paymentRoutes from './routes/payment.js';
 import bookingRoutes from './routes/booking.js';
 import uploadRoutes from './routes/upload.js';
+import orderRoutes from './routes/order.js';
+
+// Import rate limiters
+import { apiLimiter } from './middleware/rateLimit.js';
 
 // Load environment variables
 dotenv.config();
@@ -33,6 +37,9 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Rate limiting for all API routes
+app.use('/api', apiLimiter);
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -55,6 +62,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/orders', orderRoutes);
 app.use('/api/uploads', uploadRoutes);
 
 // Error handling middleware

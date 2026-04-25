@@ -3,13 +3,14 @@ import { protect, partner } from '../middleware/auth.js';
 import Partner from '../models/Partner.js';
 import Tour from '../models/Tour.js';
 import Booking from '../models/Booking.js';
+import { tourValidation, partnerValidation } from '../middleware/validation.js';
 
 const router = express.Router();
 
 // @route   POST /api/partners/profile
 // @desc    Create or update partner profile
 // @access  Private (Partner only)
-router.post('/profile', protect, partner, async (req, res) => {
+router.post('/profile', protect, partner, partnerValidation, async (req, res) => {
   try {
     const { 
       businessName, 
@@ -115,7 +116,7 @@ router.get('/profile', protect, partner, async (req, res) => {
 // @route   POST /api/partners/tours
 // @desc    Create a new tour
 // @access  Private (Partner only)
-router.post('/tours', protect, partner, async (req, res) => {
+router.post('/tours', protect, partner, tourValidation, async (req, res) => {
   try {
     const partnerProfile = await Partner.findOne({ userId: req.user.id });
 

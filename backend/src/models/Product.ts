@@ -157,6 +157,13 @@ const productSchema = new mongoose.Schema<ProductDocument>({
   timestamps: true,
 });
 
+// Add indexes for better query performance
+productSchema.index({ supplierId: 1 });
+productSchema.index({ category: 1 });
+productSchema.index({ isFeatured: 1, rating: -1 });
+productSchema.index({ price: 1 });
+productSchema.index({ stock: 1 });
+
 const Product = mongoose.model<ProductDocument>('Product', productSchema);
 
 export default Product;

@@ -1,7 +1,8 @@
 import express from 'express';
-import { protect } from '../middleware/auth.js';
+import { protect, partner } from '../middleware/auth.js';
 import Booking from '../models/Booking.js';
 import Tour from '../models/Tour.js';
+import { bookingValidation } from '../middleware/validation.js';
 
 const router = express.Router();
 
@@ -77,7 +78,7 @@ router.get('/:id', protect, async (req, res) => {
 // @route   POST /api/bookings
 // @desc    Create a booking
 // @access  Private
-router.post('/', protect, async (req, res) => {
+router.post('/', protect, bookingValidation, async (req, res) => {
   try {
     const { tourId, partnerId, tourDate, numberOfParticipants, specialRequests, participantDetails } = req.body;
 
@@ -129,7 +130,7 @@ router.post('/', protect, async (req, res) => {
 // @route   PUT /api/bookings/:id/status
 // @desc    Update booking status
 // @access  Private (partner only)
-router.put('/:id/status', protect, async (req, res) => {
+router.put('/:id/status', protect, partner, async (req, res) => {
   try {
     const { status } = req.body;
     
@@ -144,6 +145,16 @@ router.put('/:id/status', protect, async (req, res) => {
       });
     }
 
+    // Check if user is the partner associated with the booking
+    if (booking.partnerId.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        error: {
+          message: 'Not authorized',
+          status: 403
+        }
+      });
+    }
+
     // Update status
     booking.status = status;
     await booking.save();
@@ -152,6 +163,64 @@ router.put('/:id/status', protect, async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Booking updated successfully',
+      data: {
+        booking
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      error: {
+        message: error.message || 'Server error',
+        status: 500
+      }
+    });
+  }
+});
+
+// @route   PUT /api/bookings/:id/cancel
+// @desc    Cancel booking (user only)
+// @access  Private (user only)
+router.put('/:id/cancel', protect, async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    
+    if (!booking) {
+      return res.status(404).json({
+        error: {
+          message: 'Booking not found',
+          status: 404
+        }
+      });
+    }
+
+    // Check if user owns the booking
+    if (booking.userId.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        error: {
+          message: 'Not authorized',
+          status: 403
+        }
+      });
+    }
+
+    // Only allow cancellation if booking is in pending status
+    if (booking.status !== 'pending') {
+      return res.status(400).json({
+        error: {
+          message: 'Only pending bookings can be cancelled',
+          status: 400
+        }
+      });
+    }
+
+    // Update status
+    booking.status = 'cancelled';
+    await booking.save();
+    await booking.populate('tourId partnerId');
+
+    res.status(200).json({
+      success: true,
+      message: 'Booking cancelled successfully',
       data: {
         booking
       }

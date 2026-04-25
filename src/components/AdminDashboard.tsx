@@ -49,6 +49,7 @@ import type { Screen } from '../App';
 
 interface AdminDashboardProps {
   onNavigate: (screen: Screen) => void;
+  onLogout?: () => void;
   isSuperAdmin?: boolean;
 }
 
@@ -74,7 +75,7 @@ interface Admin {
   createdAt: string;
 }
 
-export function AdminDashboard({ onNavigate, isSuperAdmin = true }: AdminDashboardProps) {
+export function AdminDashboard({ onNavigate, onLogout, isSuperAdmin = true }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'admins' | 'users' | 'partners' | 'suppliers' | 'commission' | 'sponsored' | 'monetization' | 'ai' | 'disputes' | 'reports' | 'group-bookings'>('overview');
   const [showAddAdminModal, setShowAddAdminModal] = useState(false);
 
@@ -102,11 +103,22 @@ export function AdminDashboard({ onNavigate, isSuperAdmin = true }: AdminDashboa
               <p className="text-xs text-amber-100">Full System Control</p>
             </div>
           )}
-          <div className="bg-gray-50 rounded-xl p-3">
+          <div className="bg-gray-50 rounded-xl p-3 mb-4">
             <p className="text-xs text-gray-500 mb-1">Logged in as</p>
             <p className="font-bold text-sm">System Administrator</p>
             <p className="text-xs text-gray-500">admin@tourista-ar.com</p>
           </div>
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition bg-red-50 text-red-600 hover:bg-red-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span className="flex-1 text-left font-medium text-sm">Logout</span>
+          </button>
         </div>
 
         <nav className="space-y-1">
@@ -806,6 +818,9 @@ function AddAdminModal({ onClose }: { onClose: () => void }) {
 function UserManagementTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [showUserDetails, setShowUserDetails] = useState(false);
+  const [showEditUser, setShowEditUser] = useState(false);
 
   const users = [
     { id: '1', name: 'John Smith', email: 'john@example.com', country: 'South Africa', status: 'active', verified: true, joinDate: '2024-01-15', bookings: 12, tradeOrders: 5 },
@@ -813,6 +828,23 @@ function UserManagementTab() {
     { id: '3', name: 'Sarah Johnson', email: 'sarah.j@example.com', country: 'Nigeria', status: 'suspended', verified: false, joinDate: '2024-03-10', bookings: 2, tradeOrders: 0 },
     { id: '4', name: 'Ahmed Hassan', email: 'ahmed@example.com', country: 'Egypt', status: 'active', verified: true, joinDate: '2024-01-20', bookings: 15, tradeOrders: 8 },
   ];
+
+  const handleViewUser = (user: any) => {
+    setSelectedUser(user);
+    setShowUserDetails(true);
+  };
+
+  const handleEditUser = (user: any) => {
+    setSelectedUser(user);
+    setShowEditUser(true);
+  };
+
+  const handleBanUser = (userId: string) => {
+    if (window.confirm('Are you sure you want to ban this user?')) {
+      // In a real app, this would call an API to ban the user
+      console.log('Banning user:', userId);
+    }
+  };
 
   return (
     <div>
@@ -932,13 +964,25 @@ function UserManagementTab() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex justify-end gap-2">
-                    <button className="p-2 hover:bg-gray-100 rounded-lg transition">
+                    <button 
+                      className="p-2 hover:bg-gray-100 rounded-lg transition"
+                      onClick={() => handleViewUser(user)}
+                      title="View user details"
+                    >
                       <Eye className="w-5 h-5 text-gray-600" />
                     </button>
-                    <button className="p-2 hover:bg-gray-100 rounded-lg transition">
+                    <button 
+                      className="p-2 hover:bg-gray-100 rounded-lg transition"
+                      onClick={() => handleEditUser(user)}
+                      title="Edit user"
+                    >
                       <Edit className="w-5 h-5 text-gray-600" />
                     </button>
-                    <button className="p-2 hover:bg-red-50 rounded-lg transition">
+                    <button 
+                      className="p-2 hover:bg-red-50 rounded-lg transition"
+                      onClick={() => handleBanUser(user.id)}
+                      title="Ban user"
+                    >
                       <Ban className="w-5 h-5 text-red-600" />
                     </button>
                   </div>
@@ -948,6 +992,135 @@ function UserManagementTab() {
           </tbody>
         </table>
       </div>
+
+      {/* User Details Modal */}
+      {showUserDetails && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-xl font-bold">User Details</h3>
+              <button 
+                onClick={() => setShowUserDetails(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center font-bold text-2xl text-blue-600">
+                  {selectedUser.name.charAt(0)}
+                </div>
+                <div>
+                  <h4 className="text-xl font-bold">{selectedUser.name}</h4>
+                  <p className="text-gray-500">{selectedUser.email}</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Country</span>
+                  <span className="font-medium">{selectedUser.country}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Status</span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${selectedUser.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {selectedUser.status}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Verified</span>
+                  <span>{selectedUser.verified ? 'Yes' : 'No'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Join Date</span>
+                  <span>{new Date(selectedUser.joinDate).toLocaleDateString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Bookings</span>
+                  <span>{selectedUser.bookings}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Trade Orders</span>
+                  <span>{selectedUser.tradeOrders}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditUser && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-xl font-bold">Edit User</h3>
+              <button 
+                onClick={() => setShowEditUser(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Name</label>
+                <input 
+                  type="text" 
+                  defaultValue={selectedUser.name}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                <input 
+                  type="email" 
+                  defaultValue={selectedUser.email}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Country</label>
+                <input 
+                  type="text" 
+                  defaultValue={selectedUser.country}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                <select 
+                  defaultValue={selectedUser.status}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                >
+                  <option value="active">Active</option>
+                  <option value="suspended">Suspended</option>
+                  <option value="banned">Banned</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="checkbox" 
+                  checked={selectedUser.verified}
+                  className="w-4 h-4 text-blue-600 rounded"
+                />
+                <label className="text-sm font-semibold text-gray-700">Verified</label>
+              </div>
+              <div className="flex gap-3 mt-8">
+                <button 
+                  onClick={() => setShowEditUser(false)}
+                  className="flex-1 border-2 border-gray-300 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+                <button className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

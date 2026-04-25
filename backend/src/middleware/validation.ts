@@ -117,9 +117,9 @@ export const tourValidation = [
   body('description')
     .trim()
     .notEmpty().withMessage('Tour description is required'),
-  body('destination')
+  body('location')
     .trim()
-    .notEmpty().withMessage('Destination is required'),
+    .notEmpty().withMessage('Location is required'),
   body('duration')
     .notEmpty().withMessage('Duration is required')
     .isNumeric().withMessage('Duration must be a number'),
@@ -127,24 +127,31 @@ export const tourValidation = [
     .notEmpty().withMessage('Price is required')
     .isNumeric().withMessage('Price must be a number')
     .custom(value => value > 0).withMessage('Price must be greater than 0'),
-  body('maxParticipants')
-    .optional()
-    .isNumeric().withMessage('Max participants must be a number'),
+  body('maximumParticipants')
+    .notEmpty().withMessage('Maximum participants is required')
+    .isNumeric().withMessage('Maximum participants must be a number'),
   body('category')
-    .optional()
+    .notEmpty().withMessage('Category is required')
     .isString().withMessage('Category must be a string'),
-  body('highlights')
+  body('subcategory')
+    .notEmpty().withMessage('Subcategory is required')
+    .isString().withMessage('Subcategory must be a string'),
+  body('itinerary')
     .optional()
-    .isArray().withMessage('Highlights must be an array'),
-  body('included')
+    .isArray().withMessage('Itinerary must be an array'),
+  body('inclusions')
     .optional()
-    .isArray().withMessage('Included must be an array'),
+    .isArray().withMessage('Inclusions must be an array'),
+  body('exclusions')
+    .optional()
+    .isArray().withMessage('Exclusions must be an array'),
   body('images')
+    .notEmpty().withMessage('Images are required')
+    .isArray().withMessage('Images must be an array')
+    .custom(value => value.length > 0).withMessage('At least one image is required'),
+  body('videoUrl')
     .optional()
-    .isArray().withMessage('Images must be an array'),
-  body('videos')
-    .optional()
-    .isArray().withMessage('Videos must be an array'),
+    .isURL().withMessage('Video URL must be a valid URL'),
   validate
 ];
 

@@ -151,6 +151,13 @@ const tourSchema = new mongoose.Schema<TourDocument>({
   timestamps: true,
 });
 
+// Add indexes for better query performance
+tourSchema.index({ location: 1 });
+tourSchema.index({ category: 1 });
+tourSchema.index({ partnerId: 1 });
+tourSchema.index({ isFeatured: 1, rating: -1 });
+tourSchema.index({ price: 1 });
+
 const Tour = mongoose.model<TourDocument>('Tour', tourSchema);
 
 export default Tour;

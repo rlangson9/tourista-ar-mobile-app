@@ -1,0 +1,127 @@
+
+<style>
+.audit-section { margin: 0 0 1.5rem; }
+.audit-section h3 { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px; }
+.audit-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 12px; border-radius: var(--border-radius-md); margin-bottom: 4px; background: var(--color-background-secondary); }
+.audit-row.pass { border-left: 3px solid var(--color-border-success); }
+.audit-row.fail { border-left: 3px solid var(--color-border-danger); }
+.audit-row.warn { border-left: 3px solid var(--color-border-warning); }
+.badge { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; margin-top: 1px; }
+.badge.pass { background: var(--color-background-success); color: var(--color-text-success); }
+.badge.fail { background: var(--color-background-danger); color: var(--color-text-danger); }
+.badge.warn { background: var(--color-background-warning); color: var(--color-text-warning); }
+.audit-label { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.audit-detail { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.score-bar-wrap { background: var(--color-background-secondary); border-radius: 99px; height: 6px; margin: 4px 0 2px; overflow: hidden; }
+.score-bar { height: 6px; border-radius: 99px; background: var(--color-border-success); }
+.score-label { font-size: 12px; color: var(--color-text-secondary); }
+.section-score { font-size: 11px; color: var(--color-text-tertiary); float: right; margin-top: 1px; }
+</style>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem;">
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;">
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;">Overall</div>
+    <div style="font-size:22px;font-weight:500;color:var(--color-text-success);">78%</div>
+    <div class="score-bar-wrap"><div class="score-bar" style="width:78%"></div></div>
+    <div class="score-label">nearly prod-ready</div>
+  </div>
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;">
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;">Blockers</div>
+    <div style="font-size:22px;font-weight:500;color:var(--color-text-danger);">3</div>
+    <div class="score-bar-wrap"><div class="score-bar" style="width:30%;background:var(--color-border-danger)"></div></div>
+    <div class="score-label">must fix before test</div>
+  </div>
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;">
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;">Warnings</div>
+    <div style="font-size:22px;font-weight:500;color:var(--color-text-warning);">5</div>
+    <div class="score-bar-wrap"><div class="score-bar" style="width:50%;background:var(--color-border-warning)"></div></div>
+    <div class="score-label">fix before launch</div>
+  </div>
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;">
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;">Passing</div>
+    <div style="font-size:22px;font-weight:500;">14</div>
+    <div class="score-bar-wrap"><div class="score-bar" style="width:100%"></div></div>
+    <div class="score-label">all previously fixed</div>
+  </div>
+</div>
+
+<div class="audit-section">
+  <h3>Routes <span class="section-score">7 / 10</span></h3>
+
+  <div class="audit-row pass">
+    <span class="badge pass">pass</span>
+    <div><div class="audit-label">POST /api/bookings — booking creation</div><div class="audit-detail">Calculates price from tour, validates tour exists, populates response</div></div>
+  </div>
+  <div class="audit-row pass">
+    <span class="badge pass">pass</span>
+    <div><div class="audit-label">POST /api/messages — conversation threading</div><div class="audit-detail">Reuses existing conversationId between two users correctly</div></div>
+  </div>
+  <div class="audit-row pass">
+    <span class="badge pass">pass</span>
+    <div><div class="audit-label">POST /api/uploads — Cloudinary image/video</div><div class="audit-detail">Single, multi, video upload + delete all wired up</div></div>
+  </div>
+  <div class="audit-row pass">
+    <span class="badge pass">pass</span>
+    <div><div class="audit-label">Stripe webhook — payment_intent.succeeded</div><div class="audit-detail">Updates Booking paymentStatus + status, Order paymentStatus + status</div></div>
+  </div>
+  <div class="audit-row fail">
+    <span class="badge fail">blocker</span>
+    <div><div class="audit-label">No POST /api/orders route</div><div class="audit-detail">Suppliers can see orders, admin can see orders — but no way to create one. The B2B trade flow is dead.</div></div>
+  </div>
+  <div class="audit-row fail">
+    <span class="badge fail">blocker</span>
+    <div><div class="audit-label">PUT /api/bookings/:id/status — no auth check</div><div class="audit-detail">Any logged-in user can change any booking's status. The comment says "partner only" but the middleware doesn't enforce it.</div></div>
+  </div>
+  <div class="audit-row warn">
+    <span class="badge warn">warn</span>
+    <div><div class="audit-label">No booking cancellation route</div><div class="audit-detail">Users can't cancel their own bookings. Status update route is partner-only by intent.</div></div>
+  </div>
+  <div class="audit-row warn">
+    <span class="badge warn">warn</span>
+    <div><div class="audit-label">No tour/product search endpoint</div><div class="audit-detail">GET /api/tours supports filter params but no full-text search. Frontend ExploreScreen will need this.</div></div>
+  </div>
+  <div class="audit-row warn">
+    <span class="badge warn">warn</span>
+    <div><div class="audit-label">No review/rating route</div><div class="audit-detail">Tour and Product models have rating + reviewCount fields but no endpoint to submit or retrieve reviews.</div></div>
+  </div>
+  <div class="audit-row warn">
+    <span class="badge warn">warn</span>
+    <div><div class="audit-label">Stripe API version outdated</div><div class="audit-detail">apiVersion: '2023-10-16' — current is 2024-06-20. Non-breaking but worth updating.</div></div>
+  </div>
+</div>
+
+<div class="audit-section">
+  <h3>Validation <span class="section-score">2 / 11 routes</span></h3>
+  <div class="audit-row pass">
+    <span class="badge pass">pass</span>
+    <div><div class="audit-label">Auth routes — validation applied</div><div class="audit-detail">registerValidation + loginValidation wired to /register and /login</div></div>
+  </div>
+  <div class="audit-row fail">
+    <span class="badge fail">blocker</span>
+    <div><div class="audit-label">validation.ts has schemas but nothing uses them</div><div class="audit-detail">bookingValidation, messageValidation, tourValidation, productValidation, orderValidation, partnerValidation, supplierValidation are all defined but never imported into any route file.</div></div>
+  </div>
+</div>
+
+<div class="audit-section">
+  <h3>Database <span class="section-score">needs work</span></h3>
+  <div class="audit-row fail" style="border-left-color:var(--color-border-warning)">
+    <span class="badge warn">warn</span>
+    <div><div class="audit-label">No database indexes defined</div><div class="audit-detail">Message (conversationId, senderId, receiverId), Tour (location, category), Booking (userId, status), User (email — unique but no explicit index) all need indexes for query performance.</div></div>
+  </div>
+  <div class="audit-row warn">
+    <span class="badge warn">warn</span>
+    <div><div class="audit-label">No refresh tokens</div><div class="audit-detail">JWTs expire and force re-login. User model has no refreshToken field.</div></div>
+  </div>
+  <div class="audit-row pass">
+    <span class="badge pass">pass</span>
+    <div><div class="audit-label">All 7 models defined with correct schemas</div><div class="audit-detail">User, Tour, Booking, Partner, Supplier, Product, Message — all complete</div></div>
+  </div>
+</div>
+
+<div class="audit-section">
+  <h3>Security <span class="section-score">mostly good</span></h3>
+  <div class="audit-row pass"><span class="badge pass">pass</span><div><div class="audit-label">Rate limiting on auth routes</div><div class="audit-detail">loginLimiter (5/15min), registerLimiter (10/hr), passwordResetLimiter (3/hr)</div></div></div>
+  <div class="audit-row pass"><span class="badge pass">pass</span><div><div class="audit-label">Forgot-password enumeration fixed</div><div class="audit-detail">Always returns same response regardless of whether email exists</div></div></div>
+  <div class="audit-row pass"><span class="badge pass">pass</span><div><div class="audit-label">Helmet, CORS, morgan configured</div><div class="audit-detail">Security headers active, CORS restricted to FRONTEND_URL</div></div></div>
+  <div class="audit-row pass"><span class="badge pass">pass</span><div><div class="audit-label">Webhook signature verification</div><div class="audit-detail">stripeInstance.webhooks.constructEvent validates every webhook call</div></div></div>
+</div>

@@ -26,6 +26,7 @@ export function GroupBookingForm({ onNavigate }: GroupBookingFormProps) {
     additionalRequests: '',
   });
 
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -67,11 +68,21 @@ export function GroupBookingForm({ onNavigate }: GroupBookingFormProps) {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setUploadedFiles(prevFiles => [...prevFiles, ...Array.from(e.target.files)]);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate API call
+    // Simulate API call with file uploads
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
@@ -295,6 +306,64 @@ export function GroupBookingForm({ onNavigate }: GroupBookingFormProps) {
                       className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
                       placeholder="Any other special requests or information"
                     ></textarea>
+                  </div>
+                  
+                  {/* Document Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Upload Documents</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-green-600 transition-colors">
+                      <input
+                        type="file"
+                        multiple
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="file-upload"
+                      />
+                      <label
+                        htmlFor="file-upload"
+                        className="cursor-pointer text-green-600 hover:text-green-700 transition-colors"
+                      >
+                        <div className="flex flex-col items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                          </svg>
+                          <span className="font-medium">Click to upload files</span>
+                          <span className="text-xs text-gray-500">PDF, Word, Images (max 5 files)</span>
+                        </div>
+                      </label>
+                    </div>
+                    
+                    {/* Uploaded Files List */}
+                    {uploadedFiles.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {uploadedFiles.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gray-600">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                              </svg>
+                              <span className="text-sm text-gray-700 truncate max-w-xs">{file.name}</span>
+                              <span className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)}KB</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeFile(index)}
+                              className="text-red-500 hover:text-red-700 transition-colors"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                              </svg>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

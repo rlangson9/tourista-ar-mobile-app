@@ -82,6 +82,13 @@ const bookingSchema = new mongoose.Schema<BookingDocument>({
   timestamps: true,
 });
 
+// Add indexes for better query performance
+bookingSchema.index({ userId: 1 });
+bookingSchema.index({ partnerId: 1 });
+bookingSchema.index({ status: 1 });
+bookingSchema.index({ tourDate: 1 });
+bookingSchema.index({ paymentStatus: 1 });
+
 const Booking = mongoose.model<BookingDocument>('Booking', bookingSchema);
 
 export default Booking;

@@ -17,6 +17,7 @@ import { CustomTourRequest } from './components/CustomTourRequest';
 import { GroupBookingForm } from './components/GroupBookingForm';
 import { BulkOrdering } from './components/BulkOrdering';
 import { NegotiationTool } from './components/NegotiationTool';
+import { MessageScreen } from './components/MessageScreen';
 import { Toaster } from './components/ui/sonner';
 
 export type Screen =
@@ -31,12 +32,14 @@ export type Screen =
   | 'partner-dashboard'
   | 'supplier-dashboard'
   | 'admin-dashboard'
+  | 'admin-login'
   | 'trade-product-detail'
   | 'sourcing-request'
   | 'custom-tour-request'
   | 'group-booking-form'
   | 'bulk-ordering'
-  | 'negotiation-tool';
+  | 'negotiation-tool'
+  | 'message';
 
 export type AppMode = 'tourism' | 'trade';
 
@@ -49,6 +52,26 @@ export default function App() {
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [hasSelectedRole, setHasSelectedRole] = useState(false);
+  const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
+  const [selectedPartnerName, setSelectedPartnerName] = useState<string | null>(null);
+  const [previousScreen, setPreviousScreen] = useState<Screen>('home');
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminLoginError, setAdminLoginError] = useState('');
+
+  // Check for admin login URL on initial load
+  useEffect(() => {
+    const checkAdminPath = () => {
+      const path = window.location.pathname;
+      // Check if accessing admin portal via path
+      // For production: touristaadmin.com/admin-portal
+      // For development: localhost/admin-portal, 127.0.0.1/admin-portal, or any IP/admin-portal
+      if (path === '/admin-portal') {
+        setCurrentScreen('admin-login');
+      }
+    };
+    checkAdminPath();
+  }, []);
 
   // Listen for openAIAssistant custom event from other components
   useEffect(() => {
@@ -62,10 +85,17 @@ export default function App() {
     };
   }, []);
 
-  const handleNavigate = (screen: Screen, itemId?: string) => {
+  const handleNavigate = (screen: Screen, itemId?: string, partnerName?: string, partnerId?: string) => {
+    if (screen === 'message') {
+      setPreviousScreen(currentScreen);
+    }
     if (itemId) {
       if (screen === 'tour-details') setSelectedTourId(itemId);
       if (screen === 'trade-product-detail') setSelectedProductId(itemId);
+    }
+    if (screen === 'message' && partnerName && partnerId) {
+      setSelectedPartnerName(partnerName);
+      setSelectedPartnerId(partnerId);
     }
     setCurrentScreen(screen);
   };
@@ -87,16 +117,31 @@ export default function App() {
     setHasSelectedRole(true);
   };
 
-  const switchToAdminDashboard = () => {
-    setUserType('admin');
-    setCurrentScreen('admin-dashboard');
-    setHasSelectedRole(true);
-  };
+
 
   const switchToTravelerApp = () => {
     setUserType('traveler');
     setCurrentScreen('home');
     setHasSelectedRole(true);
+  };
+
+  const handleAdminLogin = (password: string) => {
+    // In a real app, this would validate against a secure backend
+    // For demo purposes, we'll use a simple password check
+    const ADMIN_PASSWORD = 'secure-admin-password-2026';
+    
+    if (password === ADMIN_PASSWORD) {
+      setIsAdminAuthenticated(true);
+      setAdminLoginError('');
+      setCurrentScreen('admin-dashboard');
+    } else {
+      setAdminLoginError('Invalid password');
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdminAuthenticated(false);
+    setCurrentScreen('admin-login');
   };
 
   return (
@@ -122,12 +167,7 @@ export default function App() {
           >
             Supplier
           </button>
-          <button
-            onClick={switchToAdminDashboard}
-            className="px-3 py-1.5 text-xs bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50"
-          >
-            Admin
-          </button>
+
         </div>
       )}
 
@@ -140,8 +180,54 @@ export default function App() {
         <SupplierDashboard onNavigate={handleNavigate} />
       )}
 
-      {userType === 'admin' && (
-        <AdminDashboard onNavigate={handleNavigate} />
+      {/* Admin Login Screen */}
+      {currentScreen === 'admin-login' && (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900">Admin Portal</h2>
+              <p className="mt-2 text-sm text-gray-600">Enter password to access admin dashboard</p>
+            </div>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleAdminLogin(adminPassword);
+            }}>
+              <div className="mb-4">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter admin password"
+                  required
+                />
+              </div>
+              
+              {adminLoginError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                  {adminLoginError}
+                </div>
+              )}
+              
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              >
+                Login
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Dashboard - only accessible after authentication */}
+      {currentScreen === 'admin-dashboard' && isAdminAuthenticated && (
+        <AdminDashboard onNavigate={handleNavigate} onLogout={handleAdminLogout} />
       )}
 
       {userType === 'traveler' && (
@@ -201,6 +287,17 @@ export default function App() {
             <NegotiationTool onNavigate={handleNavigate} />
           )}
 
+          {currentScreen === 'message' && (
+            <MessageScreen 
+              onNavigate={handleNavigate} 
+              partnerId={selectedPartnerId || undefined}
+              partnerName={selectedPartnerName || undefined}
+              previousScreen={previousScreen}
+              productId={selectedProductId || undefined}
+              tourId={selectedTourId || undefined}
+            />
+          )}
+
           {currentScreen === 'booking' && (
             <BookingFlow 
               tourId={selectedTourId} 
@@ -221,11 +318,20 @@ export default function App() {
               onSwitchToPartner={switchToPartnerDashboard}
               appMode={appMode}
               onModeChange={setAppMode}
+              language="en"
+              currency="USD"
+              onLanguageChange={() => {}}
+              onCurrencyChange={() => {}}
+              darkMode={false}
+              onToggleDarkMode={() => {}}
             />
           )}
 
           {currentScreen === 'bookings' && (
-            <BookingsScreen onNavigate={handleNavigate} />
+            <BookingsScreen 
+              onNavigate={handleNavigate}
+              appMode={appMode}
+            />
           )}
 
           {/* AI Assistant - Floating Button - Only show when user has completed onboarding */}

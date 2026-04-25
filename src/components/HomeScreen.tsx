@@ -25,8 +25,38 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showArPopup, setShowArPopup] = useState(false);
+  const [filterOrder, setFilterOrder] = useState<string[]>([]);
+  const [draggedFilter, setDraggedFilter] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState(false);
 
-  // Log showArPopup changes
+  useEffect(() => {
+    if (appMode === 'tourism') {
+      setFilterOrder(['Country', 'Budget', 'Duration', 'Business/Leisure', 'Language', 'Rating']);
+    } else {
+      setFilterOrder(['Category', 'MOQ', 'Price Range', 'Verified Only', 'Shipping', 'Delivery Time']);
+    }
+  }, [appMode]);
+
+  const handleDragStart = (filter: string) => {
+    setDraggedFilter(filter);
+  };
+
+  const handleDragOver = (e: React.DragEvent, targetFilter: string) => {
+    e.preventDefault();
+    if (draggedFilter && draggedFilter !== targetFilter) {
+      const newOrder = [...filterOrder];
+      const draggedIndex = newOrder.indexOf(draggedFilter);
+      const targetIndex = newOrder.indexOf(targetFilter);
+      newOrder.splice(draggedIndex, 1);
+      newOrder.splice(targetIndex, 0, draggedFilter);
+      setFilterOrder(newOrder);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedFilter(null);
+  };
+
   useEffect(() => {
     console.log('showArPopup changed:', showArPopup);
   }, [showArPopup]);
@@ -217,26 +247,52 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
         </div>
 
         {/* Filter Bar */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {currentFilters.map((filter) => (
+        <div className="flex items-center gap-2 pb-2">
+          {editMode && (
             <button
-              key={filter}
-              onClick={() => {
-                if (activeFilters.includes(filter)) {
-                  setActiveFilters(activeFilters.filter(f => f !== filter));
-                } else {
-                  setActiveFilters([...activeFilters, filter]);
-                }
-              }}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap ${
-                activeFilters.includes(filter)
-                  ? 'bg-white text-blue-600'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              }`}
+              onClick={() => setEditMode(false)}
+              className="flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white text-green-600 hover:bg-green-50 transition"
             >
-              {filter}
+              Done
             </button>
-          ))}
+          )}
+          {!editMode && (
+            <button
+              onClick={() => setEditMode(true)}
+              className="flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white/20 text-white hover:bg-white/30 transition"
+            >
+              Edit
+            </button>
+          )}
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide flex-1">
+            {filterOrder.map((filter) => (
+              <div
+                key={filter}
+                draggable={editMode}
+                onDragStart={() => handleDragStart(filter)}
+                onDragOver={(e) => handleDragOver(e, filter)}
+                onDragEnd={handleDragEnd}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
+                  editMode 
+                    ? 'bg-yellow-400 text-gray-900 opacity-75' 
+                    : activeFilters.includes(filter)
+                      ? 'bg-white text-blue-600'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                } ${draggedFilter === filter ? 'opacity-50' : ''}`}
+                onClick={() => {
+                  if (!editMode) {
+                    if (activeFilters.includes(filter)) {
+                      setActiveFilters(activeFilters.filter(f => f !== filter));
+                    } else {
+                      setActiveFilters([...activeFilters, filter]);
+                    }
+                  }
+                }}
+              >
+                {filter}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -314,7 +370,7 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
             
             {/* School & Company Trip Customization */}
             <button
-              onClick={() => onNavigate('group-trip-customizer')}
+              onClick={() => onNavigate('group-booking-form')}
               style={{ backgroundColor: '#f97316', transition: 'background-color 0.3s ease' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ea580c'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f97316'}

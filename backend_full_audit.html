@@ -1,0 +1,160 @@
+
+<style>
+*{box-sizing:border-box}
+.wrap{padding:0.5rem 0 1rem}
+.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.kpi-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px}
+.kpi-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.kpi-val{font-size:22px;font-weight:500}
+.kpi-sub{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.bar-wrap{height:5px;background:var(--color-background-tertiary);border-radius:99px;margin:5px 0 2px;overflow:hidden}
+.bar{height:5px;border-radius:99px}
+.section{margin-bottom:1.25rem}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.section-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);letter-spacing:0.04em;text-transform:uppercase}
+.section-score{font-size:11px;color:var(--color-text-tertiary)}
+.row{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-radius:var(--border-radius-md);margin-bottom:3px;background:var(--color-background-secondary);cursor:pointer;transition:background 0.15s}
+.row:hover{background:var(--color-background-tertiary)}
+.row.blocker{border-left:3px solid #E24B4A}
+.row.warn{border-left:3px solid #EF9F27}
+.row.ok{border-left:3px solid #1D9E75}
+.badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;white-space:nowrap;flex-shrink:0;margin-top:1px}
+.badge.blocker{background:#FCEBEB;color:#A32D2D}
+.badge.warn{background:#FAEEDA;color:#854F0B}
+.badge.ok{background:#EAF3DE;color:#3B6D11}
+.label{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.detail{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.code{font-family:var(--font-mono);font-size:11px;background:var(--color-background-tertiary);padding:1px 5px;border-radius:4px;color:var(--color-text-primary)}
+</style>
+<div class="wrap">
+<div class="kpi">
+  <div class="kpi-card">
+    <div class="kpi-label">Overall readiness</div>
+    <div class="kpi-val" style="color:#1D9E75">81%</div>
+    <div class="bar-wrap"><div class="bar" style="width:81%;background:#1D9E75"></div></div>
+    <div class="kpi-sub">up from 78% last audit</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Blockers</div>
+    <div class="kpi-val" style="color:#E24B4A">4</div>
+    <div class="bar-wrap"><div class="bar" style="width:40%;background:#E24B4A"></div></div>
+    <div class="kpi-sub">stop testing cold</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Warnings</div>
+    <div class="kpi-val" style="color:#EF9F27">8</div>
+    <div class="bar-wrap"><div class="bar" style="width:80%;background:#EF9F27"></div></div>
+    <div class="kpi-sub">fix before launch</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Passing</div>
+    <div class="kpi-val">18</div>
+    <div class="bar-wrap"><div class="bar" style="width:100%;background:#1D9E75"></div></div>
+    <div class="kpi-sub">solid foundation</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head"><span class="section-title">🚨 Blockers — fix before any testing</span><span class="section-score">4 issues</span></div>
+
+  <div class="row blocker" onclick="sendPrompt('Wire bookingValidation, messageValidation, tourValidation, productValidation, partnerValidation and supplierValidation into their route files')">
+    <span class="badge blocker">blocker</span>
+    <div><div class="label">Validation schemas wired nowhere except auth</div>
+    <div class="detail">validation.ts has 7 schemas. Only <span class="code">registerValidation</span> + <span class="code">loginValidation</span> are used. The other 5 (<span class="code">bookingValidation</span>, <span class="code">messageValidation</span>, <span class="code">tourValidation</span>, <span class="code">productValidation</span>, <span class="code">partnerValidation</span>, <span class="code">supplierValidation</span>) are defined but never imported anywhere.</div></div>
+  </div>
+
+  <div class="row blocker" onclick="sendPrompt('Create a POST /api/orders route file for Tourista AR with orderValidation applied')">
+    <span class="badge blocker">blocker</span>
+    <div><div class="label">No POST /api/orders route — B2B trade is dead</div>
+    <div class="detail"><span class="code">orderValidation</span> is written, Order model exists, supplier can view orders — but there is no route to create one. The entire trade checkout flow has nowhere to land.</div></div>
+  </div>
+
+  <div class="row blocker" onclick="sendPrompt('Fix the booking status update route to enforce partner-only access and ownership check')">
+    <span class="badge blocker">blocker</span>
+    <div><div class="label">PUT /api/bookings/:id/status — no auth or ownership enforcement</div>
+    <div class="detail">The comment says "partner only" but the middleware stack is just <span class="code">protect</span>. Any logged-in user can set any booking to <span class="code">cancelled</span> or <span class="code">completed</span>. Needs <span class="code">partner</span> guard + a check that the booking's partnerId matches the requester.</div></div>
+  </div>
+
+  <div class="row blocker" onclick="sendPrompt('Add apiLimiter and messageLimiter to server.ts and message routes in Tourista AR')">
+    <span class="badge blocker">blocker</span>
+    <div><div class="label">apiLimiter and messageLimiter defined but never applied</div>
+    <div class="detail"><span class="code">apiLimiter</span> (100 req/min) and <span class="code">messageLimiter</span> (30 msg/min) are exported from rateLimit.ts but never imported into server.ts or the message route. Spam is completely unprotected.</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head"><span class="section-title">⚠️ Warnings — fix before launch</span><span class="section-score">8 issues</span></div>
+
+  <div class="row warn" onclick="sendPrompt('Add database indexes to Message, Tour, Booking and User models in Tourista AR')">
+    <span class="badge warn">warn</span>
+    <div><div class="label">No database indexes on any model</div>
+    <div class="detail">Message queries by <span class="code">conversationId</span>, <span class="code">senderId</span>, <span class="code">receiverId</span> on every send. Tour queries by <span class="code">location</span>, <span class="code">category</span>. Booking by <span class="code">userId</span>, <span class="code">partnerId</span>. Full collection scans from day one.</div></div>
+  </div>
+
+  <div class="row warn" onclick="sendPrompt('The nodemailer transporter is recreated on every request in auth.ts and admin.ts — refactor to a shared singleton emailService')">
+    <span class="badge warn">warn</span>
+    <div><div class="label">Nodemailer transporter recreated on every single email call</div>
+    <div class="detail">Both <span class="code">auth.ts</span> and <span class="code">admin.ts</span> call <span class="code">nodemailer.createTransport()</span> inline on each request. A new SMTP connection is opened every time. Should be a singleton module shared across the app.</div></div>
+  </div>
+
+  <div class="row warn" onclick="sendPrompt('Add a DELETE /api/bookings/:id cancel route for users to cancel their own bookings')">
+    <span class="badge warn">warn</span>
+    <div><div class="label">Users cannot cancel their own bookings</div>
+    <div class="detail">The status update route is partner-only by intent. There is no user-facing cancellation endpoint. Users who want to cancel are completely stuck.</div></div>
+  </div>
+
+  <div class="row warn" onclick="sendPrompt('Add a reviews and ratings system to tours and products in Tourista AR backend')">
+    <span class="badge warn">warn</span>
+    <div><div class="label">Rating fields exist on Tour and Product but no review route</div>
+    <div class="detail"><span class="code">rating</span> and <span class="code">reviewCount</span> are in both schemas. There is no <span class="code">POST /api/tours/:id/reviews</span> or <span class="code">GET /api/tours/:id/reviews</span>. Those fields will stay 0 forever.</div></div>
+  </div>
+
+  <div class="row warn" onclick="sendPrompt('Add full-text search to GET /api/tours and GET /api/trade/products using MongoDB text indexes')">
+    <span class="badge warn">warn</span>
+    <div><div class="label">No full-text search on tours or products</div>
+    <div class="detail">Tour filtering supports <span class="code">category</span>, <span class="code">location</span> (regex), and price range. There is no keyword search on <span class="code">title</span> or <span class="code">description</span>. The ExploreScreen search bar will hit the API and get no results.</div></div>
+  </div>
+
+  <div class="row warn" onclick="sendPrompt('Fix the tourValidation schema — it validates destination but the Tour model field is called location')">
+    <span class="badge warn">warn</span>
+    <div><div class="label">tourValidation validates wrong field name</div>
+    <div class="detail"><span class="code">tourValidation</span> checks <span class="code">body('destination')</span> but the Tour model field is called <span class="code">location</span>. The validation will always pass on this field and <span class="code">location</span> will never be validated.</div></div>
+  </div>
+
+  <div class="row warn" onclick="sendPrompt('Stripe API version is 2023-10-16 in payment.ts — update to the current version')">
+    <span class="badge warn">warn</span>
+    <div><div class="label">Stripe API version is outdated</div>
+    <div class="detail"><span class="code">apiVersion: '2023-10-16'</span> — current is <span class="code">2024-06-20</span>. Non-breaking now but Stripe deprecates old versions and will start sending warnings.</div></div>
+  </div>
+
+  <div class="row warn" onclick="sendPrompt('The GET /api/messages/:conversationId route has no authorization check — any user can read any conversation')">
+    <span class="badge warn">warn</span>
+    <div><div class="label">Any user can read any conversation by ID</div>
+    <div class="detail"><span class="code">GET /api/messages/:conversationId</span> fetches all messages in that conversation with no check that the requesting user is actually a participant. Anyone with a valid conversationId can read private messages.</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head"><span class="section-title">✅ Confirmed passing</span><span class="section-score">18 checks</span></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Auth — register, login, verify email, forgot/reset password</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">JWT middleware — protect, admin, partner, supplier guards</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Rate limiting — login (5/15m), register (10/hr), reset (3/hr)</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Stripe webhook — updates booking + order on success/failure</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Booking creation — validates tour, calculates price correctly</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Message threading — reuses conversationId between users</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Cloudinary uploads — image, multi-image, video, delete</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Pagination on tours, products, all admin list endpoints</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Forgot-password enumeration fix — always same response</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Partner + supplier approval emails via nodemailer</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">All 7 models — User, Tour, Booking, Partner, Supplier, Product, Message</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Partner dashboard — tours, bookings, profile CRUD</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Supplier dashboard — products, orders, profile CRUD</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Admin — users, partners, suppliers, tours, products, bookings, orders</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Tour detail — increments views, populates partner</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">CORS restricted to FRONTEND_URL, helmet security headers</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Health check — reports MongoDB connection state</div></div></div>
+    <div class="row ok" style="cursor:default"><span class="badge ok">pass</span><div><div class="label">Error handling middleware — global 500 handler in server.ts</div></div></div>
+  </div>
+</div>
+</div>
