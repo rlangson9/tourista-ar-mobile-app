@@ -234,7 +234,13 @@ export function TourDetails({ tourId, onNavigate }: TourDetailsProps) {
     );
   }
 
-  const images = [tour.image, tour.image, tour.image]; // In real app, multiple images
+  const images = [
+    tour.image,
+    'https://images.unsplash.com/photo-1501785888041-af3ef281b399?w=800',
+    'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800',
+    'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800',
+    'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800'
+  ];
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-white">

@@ -18,6 +18,7 @@ import { GroupBookingForm } from './components/GroupBookingForm';
 import { BulkOrdering } from './components/BulkOrdering';
 import { NegotiationTool } from './components/NegotiationTool';
 import { MessageScreen } from './components/MessageScreen';
+import { ProductDiscovery } from './components/ProductDiscovery';
 import { Toaster } from './components/ui/sonner';
 
 export type Screen =
@@ -39,7 +40,8 @@ export type Screen =
   | 'group-booking-form'
   | 'bulk-ordering'
   | 'negotiation-tool'
-  | 'message';
+  | 'message'
+  | 'product-discovery';
 
 export type AppMode = 'tourism' | 'trade';
 
@@ -284,6 +286,10 @@ export default function App() {
 
           {currentScreen === 'negotiation-tool' && (
             <NegotiationTool onNavigate={handleNavigate} />
+          )}
+
+          {currentScreen === 'product-discovery' && (
+            <ProductDiscovery onNavigate={handleNavigate} />
           )}
 
           {currentScreen === 'message' && (

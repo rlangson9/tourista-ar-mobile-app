@@ -153,7 +153,13 @@ export function TradeProductDetail({ productId, onNavigate }: TradeProductDetail
     showNotification('Reply submitted successfully!');
   };
 
-  const images = [product.image, product.image, product.image];
+  const images = [
+    product.image,
+    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
+    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800',
+    'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800',
+    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800'
+  ];
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-white">

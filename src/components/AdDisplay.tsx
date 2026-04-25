@@ -12,7 +12,8 @@ interface AdData {
   advertiser: string;
   category: 'tourism' | 'trade';
   type: 'banner' | 'card' | 'native' | 'popup';
-  targetUrl: string;
+  targetUrl: string; // Screen name
+  targetItemId?: string; // Optional item ID
   ctaText: string;
   budget: number;
   status: 'active' | 'paused' | 'expired';
@@ -46,11 +47,11 @@ const mockAds: AdData[] = [
     id: 'AD001',
     title: 'Luxury Beijing Experience',
     description: '5-star tours with private guides and exclusive access',
-    imageUrl: '/api/placeholder/400/300',
+    imageUrl: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800',
     advertiser: 'Premium Tours Ltd',
     category: 'tourism',
     type: 'banner',
-    targetUrl: '/tour-details/1',
+    targetUrl: 'explore',
     ctaText: 'Book Now',
     budget: 5000,
     status: 'active',
@@ -70,11 +71,12 @@ const mockAds: AdData[] = [
     id: 'AD002',
     title: 'African Safari Adventure',
     description: 'Wildlife tours with experienced guides',
-    imageUrl: '/api/placeholder/400/300',
+    imageUrl: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800',
     advertiser: 'Safari Adventures',
     category: 'tourism',
     type: 'card',
-    targetUrl: '/tour-details/safari-adventure',
+    targetUrl: 'tour-details',
+    targetItemId: '4',
     ctaText: 'Explore',
     budget: 3000,
     status: 'active',
@@ -93,11 +95,11 @@ const mockAds: AdData[] = [
     id: 'AD003',
     title: 'Premium Electronics Supplier',
     description: 'Wholesale electronics with fast shipping',
-    imageUrl: '/api/placeholder/400/300',
+    imageUrl: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800',
     advertiser: 'TechSource Global',
     category: 'trade',
     type: 'native',
-    targetUrl: '/supplier/techsource',
+    targetUrl: 'explore',
     ctaText: 'View Products',
     budget: 4000,
     status: 'active',
@@ -116,11 +118,12 @@ const mockAds: AdData[] = [
     id: 'AD004',
     title: 'Shanghai Modern Experience',
     description: 'Explore the modern side of Shanghai with luxury accommodations',
-    imageUrl: '/api/placeholder/400/300',
+    imageUrl: 'https://images.unsplash.com/photo-1474181487882-5abf3f0ba692?w=800',
     advertiser: 'Urban Tours Co.',
     category: 'tourism',
     type: 'card',
-    targetUrl: '/tour-details/shanghai-modern',
+    targetUrl: 'tour-details',
+    targetItemId: '1',
     ctaText: 'Book Now',
     budget: 3500,
     status: 'active',
@@ -219,14 +222,8 @@ export function AdDisplay({
     
     // Navigate if target URL is provided
     if (ad.targetUrl && onNavigate) {
-      // Handle navigation based on target URL
-      if (ad.targetUrl.startsWith('/tour-details/')) {
-        const tourId = ad.targetUrl.split('/').pop();
-        onNavigate('tour-details', tourId);
-      } else if (ad.targetUrl.startsWith('/supplier/')) {
-        const supplierId = ad.targetUrl.split('/').pop();
-        onNavigate('trade-product-detail', supplierId);
-      }
+      // Use targetUrl as screen name and targetItemId as optional ID
+      onNavigate(ad.targetUrl as Screen, ad.targetItemId);
     }
   };
 
@@ -343,7 +340,13 @@ export function AdDisplay({
             <div className="text-xs text-gray-500">
               {currentAd.advertiser}
             </div>
-            <button className="text-blue-600 text-sm font-semibold hover:underline">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAdClick(currentAd);
+              }}
+              className="text-blue-600 text-sm font-semibold hover:underline"
+            >
               {currentAd.ctaText}
             </button>
           </div>
