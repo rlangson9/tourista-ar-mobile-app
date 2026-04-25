@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import { Bot, X, Send, Sparkles, AlertCircle } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -79,7 +81,7 @@ export function AIAssistant({ isOpen, onToggle, appMode }: AIAssistantProps) {
 
     try {
       const apiKey = import.meta.env.VITE_AI_API_KEY;
-      const baseUrl = import.meta.env.VITE_AI_BASE_URL || 'https://api.anthropic.com';
+      const baseUrl = import.meta.env.VITE_AI_BASE_URL || 'https://api.deepseek.com/v1';
 
       if (!apiKey) {
         throw new Error('AI API key not configured. Add VITE_AI_API_KEY to your .env file.');
@@ -87,23 +89,23 @@ export function AIAssistant({ isOpen, onToggle, appMode }: AIAssistantProps) {
 
       // Build history excluding the initial welcome message
       const conversationHistory = updatedMessages.map((m) => ({
-        role: m.role,
+        role: m.role === 'assistant' ? 'assistant' : 'user',
         content: m.content,
       }));
 
-      const response = await fetch(`${baseUrl}/v1/messages`, {
+      const response = await fetch(`${baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
+          'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
+          model: 'deepseek-chat',
           max_tokens: 400,
-          system: SYSTEM_PROMPTS[appMode],
-          messages: conversationHistory,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPTS[appMode] },
+            ...conversationHistory,
+          ],
         }),
       });
 
@@ -114,7 +116,7 @@ export function AIAssistant({ isOpen, onToggle, appMode }: AIAssistantProps) {
 
       const data = await response.json();
       const assistantContent =
-        data.content?.[0]?.text ?? 'Sorry, I could not generate a response.';
+        data.choices?.[0]?.message?.content ?? 'Sorry, I could not generate a response.';
 
       setMessages((prev) => [...prev, { role: 'assistant', content: assistantContent }]);
     } catch (err) {

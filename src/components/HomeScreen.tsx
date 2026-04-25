@@ -165,8 +165,8 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
 
   return (
     <div className="w-full bg-background pb-20">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 pt-4 pb-6 rounded-b-3xl shadow-lg" style={{ paddingTop: `calc(1rem + env(safe-area-inset-top))` }}>
+      {/* Header - Sticky */}
+      <div className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 pb-6 shadow-lg" style={{ paddingTop: `calc(0rem + env(safe-area-inset-top))` }}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <img src={touristaLogo} alt="Tourista AR" className="h-12" />
@@ -219,7 +219,7 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
 
         {/* Search Bar */}
         <div className="w-full bg-card rounded-2xl shadow-lg hover:shadow-xl transition-shadow mb-3">
-          <div className="flex items-center p-4 gap-3">
+          <div className="flex items-center gap-3" style={{ padding: '7px 16px' }}>
             <Search className="w-5 h-5 text-muted-foreground flex-shrink-0" />
             <input
               type="text"
@@ -247,7 +247,7 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
         </div>
 
         {/* Filter Bar */}
-        <div className="flex items-center gap-2 pb-2">
+        <div className="flex items-center gap-2" style={{ paddingBottom: '0px', marginTop: '-9px', marginBottom: '-9px' }}>
           {editMode && (
             <button
               onClick={() => setEditMode(false)}
@@ -259,7 +259,8 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
           {!editMode && (
             <button
               onClick={() => setEditMode(true)}
-              className="flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white/20 text-white hover:bg-white/30 transition"
+              className="flex-shrink-0 px-3 py-2 rounded-full font-semibold bg-white/20 text-white hover:bg-white/30 transition"
+              style={{ fontSize: '10px' }}
             >
               Edit
             </button>
@@ -272,13 +273,20 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
                 onDragStart={() => handleDragStart(filter)}
                 onDragOver={(e) => handleDragOver(e, filter)}
                 onDragEnd={handleDragEnd}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
+                className={`flex-shrink-0 px-4 rounded-full font-semibold transition whitespace-nowrap cursor-pointer ${
                   editMode 
                     ? 'bg-yellow-400 text-gray-900 opacity-75' 
                     : activeFilters.includes(filter)
                       ? 'bg-white text-blue-600'
                       : 'bg-white/20 text-white hover:bg-white/30'
                 } ${draggedFilter === filter ? 'opacity-50' : ''}`}
+                style={{ 
+                  fontSize: '10px',
+                  marginTop: '4px',
+                  marginBottom: '4px',
+                  paddingTop: filter === 'Shipping' ? '8px' : '8px',
+                  paddingBottom: filter === 'Shipping' ? '8px' : '8px'
+                }}
                 onClick={() => {
                   if (!editMode) {
                     if (activeFilters.includes(filter)) {
