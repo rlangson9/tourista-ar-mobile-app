@@ -146,8 +146,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Quick switch for demo purposes - only show during onboarding and before role selection */}
-      {!hasCompletedOnboarding && !hasSelectedRole && (
+      {/* Quick switch for demo purposes - only show after onboarding and role selection */}
+      {hasCompletedOnboarding && hasSelectedRole && (
         <div className="fixed top-2 right-2 z-50 flex gap-2">
           <button
             onClick={switchToTravelerApp}
@@ -167,7 +167,6 @@ export default function App() {
           >
             Supplier
           </button>
-
         </div>
       )}
 

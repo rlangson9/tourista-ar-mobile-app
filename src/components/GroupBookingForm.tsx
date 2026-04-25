@@ -95,7 +95,7 @@ export function GroupBookingForm({ onNavigate }: GroupBookingFormProps) {
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10" style={{ paddingTop: `env(safe-area-inset-top)` }}>
         <div className="px-4 py-3 flex items-center gap-3">
           <button
-            onClick={() => onNavigate('bookings')}
+            onClick={() => onNavigate('home')}
             className="p-2 hover:bg-gray-100 rounded-full transition"
           >
             <ArrowLeft className="w-6 h-6" />
