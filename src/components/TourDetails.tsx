@@ -282,7 +282,7 @@ export function TourDetails({ tourId, onNavigate }: TourDetailsProps) {
         </div>
 
         {/* AR & Virtual Tour Badges */}
-        <div className="absolute bottom-3 right-3 flex gap-2">
+        <div className="absolute bottom-3 right-3 flex gap-2" style={{ marginLeft: '37px', marginRight: '37px' }}>
           <button
             onClick={() => onNavigate('ar-experience', tour.id)}
             className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1.5 rounded-full text-xs font-bold hover:scale-105 transition-transform shadow-lg"
@@ -293,6 +293,7 @@ export function TourDetails({ tourId, onNavigate }: TourDetailsProps) {
           <button
             onClick={() => onNavigate('virtual-tour-360', tour.id)}
             className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-3 py-1.5 rounded-full text-xs font-bold hover:scale-105 transition-transform shadow-lg"
+            style={{ marginLeft: '-2px', marginRight: '-2px' }}
             aria-label="View 360° virtual tour"
           >
             360°
@@ -300,7 +301,7 @@ export function TourDetails({ tourId, onNavigate }: TourDetailsProps) {
         </div>
 
         {/* Image Indicators */}
-        <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+        <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm" style={{ left: '373px' }}>
           {selectedImage + 1} / {images.length}
         </div>
       </div>
