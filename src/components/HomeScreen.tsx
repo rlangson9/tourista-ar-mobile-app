@@ -25,6 +25,9 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showArPopup, setShowArPopup] = useState(false);
+  const [arPopupMode, setArPopupMode] = useState<AppMode>('tourism');
+  const [arCountdown, setArCountdown] = useState(10);
+  const [arCanClose, setArCanClose] = useState(false);
   const [filterOrder, setFilterOrder] = useState<string[]>([]);
   const [draggedFilter, setDraggedFilter] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -60,6 +63,43 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
   useEffect(() => {
     console.log('showArPopup changed:', showArPopup);
   }, [showArPopup]);
+
+  // ── AR popup: launch for a given mode ──────────────────────────────────
+  const showArComingSoon = (mode: AppMode) => {
+    setArPopupMode(mode);
+    setArCountdown(10);
+    setArCanClose(false);
+    setShowArPopup(true);
+  };
+
+  const closeArPopup = () => {
+    if (!arCanClose) return;
+    setShowArPopup(false);
+    setArCountdown(10);
+    setArCanClose(false);
+  };
+
+  // Countdown + auto-close — resets whenever popup opens
+  useEffect(() => {
+    if (!showArPopup) return;
+    const tick = setInterval(() => {
+      setArCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(tick);
+          closeArPopup();
+          return 0;
+        }
+        if (prev === 6) setArCanClose(true);
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(tick);
+  }, [showArPopup, arCanClose]);
+
+  // Show on first mount (tourism colours by default)
+  useEffect(() => {
+    showArComingSoon('tourism');
+  }, []);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filtered data states
@@ -142,21 +182,6 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
     return () => clearInterval(interval);
   }, []);
 
-  // Function to show AR popup
-  const showArComingSoon = () => {
-    console.log('Showing AR popup');
-    setShowArPopup(true);
-    // Set timer to hide popup
-    setTimeout(() => {
-      setShowArPopup(false);
-    }, 3000);
-  };
-
-  // Show AR coming soon popup on mount
-  useEffect(() => {
-    showArComingSoon();
-  }, []);
-
   const tourFilters = ['Country', 'Budget', 'Duration', 'Business/Leisure', 'Language', 'Rating'];
   const tradeFilters = ['Category', 'MOQ', 'Price Range', 'Verified Only', 'Shipping', 'Delivery Time'];
   const currentFilters = appMode === 'tourism' ? tourFilters : tradeFilters;
@@ -176,7 +201,7 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
             <button
               onClick={() => {
                 onModeChange('tourism');
-                showArComingSoon();
+                showArComingSoon('tourism');
               }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition ${
                 appMode === 'tourism'
@@ -190,7 +215,7 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
             <button
               onClick={() => {
                 onModeChange('trade');
-                showArComingSoon();
+                showArComingSoon('trade');
               }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition ${
                 appMode === 'trade'
@@ -609,7 +634,7 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
                         </div>
                       </div>
                       <button 
-                        onClick={() => onNavigate('supplier-store', undefined, undefined, undefined, supplier)}
+                        onClick={() => onNavigate('supplier-dashboard')}
                         className="text-blue-600 text-sm font-semibold whitespace-nowrap hover:underline transition"
                       >
                         View Store
