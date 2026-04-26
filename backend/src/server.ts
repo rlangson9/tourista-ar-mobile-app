@@ -25,33 +25,161 @@ import { apiLimiter } from './middleware/rateLimit.js';
 // Load environment variables
 dotenv.config();
 
-// Create Express app
+// ── Validate required env vars ───────────────────────────────────────────────
+const REQUIRED_ENV = ['MONGODB_URI', 'JWT_SECRET'];
+const missing = REQUIRED_ENV.filter(k => !process.env[k]);
+if (missing.length > 0) {
+  console.error(`❌ Missing required environment variables: ${missing.join(', ')}`);
+  console.error('   Create a backend/.env file — see backend/.env.example');
+  process.exit(1);
+}
+
+// ── MongoDB connection ───────────────────────────────────────────────────────
+const MONGO_URI = process.env.MONGODB_URI as string;
+
+const MONGO_OPTIONS: mongoose.ConnectOptions = {
+  serverSelectionTimeoutMS: 15000,
+  socketTimeoutMS: 45000,
+  connectTimeoutMS: 15000,
+  maxPoolSize: 10,
+  minPoolSize: 2,
+  retryWrites: true,
+  retryReads: true,
+  heartbeatFrequencyMS: 10000,
+};
+
+// Connection state labels (mongoose readyState codes)
+const DB_STATES: Record<number, string> = {
+  0: 'disconnected',
+  1: 'connected',
+  2: 'connecting',
+  3: 'disconnecting',
+};
+
+function dbState(): string {
+  return DB_STATES[mongoose.connection.readyState] ?? 'unknown';
+}
+
+// Mongoose connection event listeners
+mongoose.connection.on('connecting', () => console.log('⏳ MongoDB connecting...'));
+mongoose.connection.on('connected', () => console.log('✅ MongoDB connected'));
+mongoose.connection.on('disconnected', () => console.log('⚠️  MongoDB disconnected — will retry'));
+mongoose.connection.on('reconnected', () => console.log('🔄 MongoDB reconnected'));
+mongoose.connection.on('error', (err) => console.error('❌ MongoDB error:', err.message));
+mongoose.connection.on('close', () => console.log('🔒 MongoDB connection closed'));
+
+let isConnecting = false;
+
+async function connectDB(attempt = 1): Promise<void> {
+  if (isConnecting) return;
+  isConnecting = true;
+
+  const MAX_RETRIES = 5;
+  const RETRY_DELAY = Math.min(5000 * attempt, 30000);
+
+  try {
+    console.log(`🔌 MongoDB connect attempt ${attempt}/${MAX_RETRIES}...`);
+    await mongoose.connect(MONGO_URI, MONGO_OPTIONS);
+    isConnecting = false;
+    console.log(`✅ MongoDB ready — db: "${mongoose.connection.db?.databaseName}"`);
+  } catch (err: any) {
+    isConnecting = false;
+    console.error(`❌ MongoDB attempt ${attempt} failed: ${err.message}`);
+
+    if (attempt < MAX_RETRIES) {
+      console.log(`   Retrying in ${RETRY_DELAY / 1000}s...`);
+      await new Promise(r => setTimeout(r, RETRY_DELAY));
+      return connectDB(attempt + 1);
+    }
+
+    console.error('   Max retries reached. Check Atlas credentials and network access.');
+    console.error('   → `https://cloud.mongodb.com`  → Network Access → Add your IP');
+  }
+}
+
+// Auto-reconnect on unexpected disconnect
+mongoose.connection.on('disconnected', () => {
+  if (!isConnecting) {
+    console.log('🔄 Scheduling MongoDB reconnect in 5s...');
+    setTimeout(() => connectDB(), 5000);
+  }
+});
+
+// ── Express app ──────────────────────────────────────────────────────────────
 const app = express();
 
-// Middleware
+// Security & parsing middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
 }));
 app.use(helmet());
 app.use(morgan('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rate limiting for all API routes
+// Rate limiting for all /api routes
 app.use('/api', apiLimiter);
 
-// Health check route
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'Tourista AR Backend is running',
-    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    mode: mongoose.connection.readyState === 1 ? 'full' : 'limited'
+// ── DB-required middleware ───────────────────────────────────────────────────
+app.use('/api', (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      success: false,
+      error: {
+        message: 'Database unavailable. Please try again in a moment.',
+        status: 503,
+        db: dbState(),
+      },
+    });
+  }
+  next();
+});
+
+// ── Health check ─────────────────────────────────────────────────────────────
+app.get('/health', (_req, res) => {
+  const connected = mongoose.connection.readyState === 1;
+  res.status(connected ? 200 : 503).json({
+    status: connected ? 'ok' : 'degraded',
+    server: 'Tourista AR Backend',
+    version: '1.0.0',
+    mongodb: {
+      state: dbState(),
+      database: mongoose.connection.db?.databaseName ?? null,
+      host: mongoose.connection.host ?? null,
+    },
+    uptime: Math.floor(process.uptime()) + 's',
+    timestamp: new Date().toISOString(),
   });
 });
 
-// API routes
+// ── Database health endpoint ──────────────────────────────────────────────────
+app.get('/health/db', async (_req, res) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        db: dbState(),
+        message: 'MongoDB not connected',
+      });
+    }
+
+    await mongoose.connection.db!.admin().ping();
+    res.json({
+      success: true,
+      db: dbState(),
+      message: 'MongoDB is responding',
+    });
+  } catch (error: any) {
+    res.status(503).json({
+      success: false,
+      db: dbState(),
+      message: error.message,
+    });
+  }
+});
+
+// ── API routes ───────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/partners', partnerRoutes);
@@ -71,38 +199,17 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(err.status || 500).json({
     error: {
       message: err.message || 'Internal Server Error',
-      status: err.status || 500
-    }
+      status: err.status || 500,
+    },
   });
 });
 
-// Start server immediately
+// ── Start server ─────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5002;
 const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log('⏳ Attempting to connect to MongoDB...');
 });
 
-// Connect to MongoDB asynchronously
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI as string, {
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 10000,
-    });
-    console.log('✅ Connected to MongoDB - Full functionality available');
-  } catch (error) {
-    console.error('❌ MongoDB connection failed:', error);
-    console.log('\n⚠️  Running in LIMITED MODE (no database)');
-    console.log('APIs will work but data will not persist\n');
-    console.log('To enable full functionality:');
-    console.log('1. Log into MongoDB Atlas: https://cloud.mongodb.com');
-    console.log('2. Create a new cluster named "touristaar"');
-    console.log('3. Create a database user: rlangson9_db_user / Tourista2025');
-    console.log('4. Add your IP to Network Access');
-    console.log('5. Get the connection string and update backend/.env\n');
-  }
-};
-
-// Start MongoDB connection after server is running
+// Start MongoDB connection
 connectDB();
