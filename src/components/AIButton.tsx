@@ -135,7 +135,7 @@ export function AIButton({ onOpen, isAssistantOpen }: AIButtonProps) {
         <>
           <div
             style={{
-              position: 'fixed',
+              position: 'static',
               left: position.x,
               top: position.y,
               zIndex: 9999,

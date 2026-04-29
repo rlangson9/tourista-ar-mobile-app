@@ -31,7 +31,6 @@ interface ProfileScreenProps {
 }
 
 export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeChange, language, currency, onLanguageChange, onCurrencyChange, exchangeRates, exchangeRatesLoading, exchangeRatesError, onRefreshExchangeRates, darkMode, onToggleDarkMode }: ProfileScreenProps) {
-  const [accountType, setAccountType] = useState<'individual' | 'business'>('individual');
   const [loyaltyPoints, setLoyaltyPoints] = useState(850);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -189,15 +188,6 @@ export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeCh
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              {accountType === 'business' && (
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Business Documents</label>
-                  <button className="w-full p-4 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-600 hover:bg-blue-50 transition text-center">
-                    <p className="font-semibold text-gray-700">Upload Business Documents</p>
-                    <p className="text-sm text-gray-500">Business registration, licenses</p>
-                  </button>
-                </div>
-              )}
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsEditingProfile(false)}
@@ -334,7 +324,7 @@ export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeCh
   return (
     <div className="max-w-md mx-auto bg-gray-50 pb-20 pt-8">
       {/* Header with Profile Info */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-b-3xl shadow-lg" style={{ paddingTop: `calc(1.5rem + env(safe-area-inset-top))` }}>
+      <div className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg" style={{ padding: '7px 24px' }}>
         <button
           onClick={() => onNavigate('home')}
           className="mb-4 p-2 hover:bg-white/10 rounded-full transition"
@@ -404,43 +394,11 @@ export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeCh
             </div>
           </div>
         </div>
-
-        {/* Account Type Toggle */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-          <p className="text-sm text-blue-100 mb-2">Account Type</p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setAccountType('individual')}
-              className={`flex-1 py-2 px-4 rounded-xl font-semibold transition ${
-                accountType === 'individual'
-                  ? 'bg-white text-blue-600'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              }`}
-            >
-              Individual
-            </button>
-            <button
-              onClick={() => setAccountType('business')}
-              className={`flex-1 py-2 px-4 rounded-xl font-semibold transition ${
-                accountType === 'business'
-                  ? 'bg-white text-blue-600'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              }`}
-            >
-              Business
-            </button>
-          </div>
-          {accountType === 'individual' && (
-            <p className="text-xs text-blue-100 mt-2">
-              Switch to Business to sell tours or trade products
-            </p>
-          )}
-        </div>
       </div>
 
       <div className="p-4 space-y-4">
         {/* Loyalty System - Minimalistic Design */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
+        <div className="bg-white rounded-2xl shadow-sm" style={{ padding: '10px 24px' }}>
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-bold text-gray-900">Loyalty Rewards</h2>
@@ -454,12 +412,12 @@ export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeCh
           
           {/* Clean Level Badge */}
           <div className="flex items-center gap-3 mb-4">
-            <div className={`px-4 py-2 rounded-full font-bold text-sm ${
+            <div className={`px-4 rounded-full font-bold text-sm ${
               loyaltyLevel === 'Platinum' ? 'bg-gray-900 text-white' :
               loyaltyLevel === 'Gold' ? 'bg-amber-500 text-white' :
               loyaltyLevel === 'Silver' ? 'bg-gray-400 text-white' :
               'bg-amber-700 text-white'
-            }`}>
+            }`} style={{ paddingTop: '0px', paddingBottom: '0px' }}>
               {loyaltyLevel} Member
             </div>
             <div className="flex-1 text-sm text-gray-600">
@@ -494,7 +452,8 @@ export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeCh
           {/* Convert Points Button */}
           <button 
             onClick={() => setShowConvertPointsModal(true)}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition"
+            style={{ paddingTop: '0px', paddingBottom: '0px' }}
           >
             Convert Points
           </button>
@@ -548,7 +507,7 @@ export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeCh
 
           {/* Referral Stats */}
           <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="text-center p-4 bg-gray-50 rounded-xl">
+            <div className="text-center bg-gray-50 rounded-xl" style={{ padding: '13px', marginTop: '1px', marginBottom: '1px' }}>
               <p className="text-2xl font-bold text-blue-600">{referrals}</p>
               <p className="text-xs text-gray-600 mt-1">Referrals</p>
             </div>
@@ -928,15 +887,13 @@ export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeCh
               icon={FileText}
               onClick={() => onNavigate('about')}
             />
-            {accountType === 'individual' && (
-              <MenuItem
-                title="Become a Partner"
-                subtitle="List tours or products"
-                icon={Briefcase}
-                onClick={onSwitchToPartner}
-                highlight
-              />
-            )}
+            <MenuItem
+              title="Become a Partner"
+              subtitle="List tours or products"
+              icon={Briefcase}
+              onClick={onSwitchToPartner}
+              highlight
+            />
           </div>
         </div>
 

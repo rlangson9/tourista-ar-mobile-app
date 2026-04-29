@@ -1,4 +1,4 @@
-import { Search, MapPin, Star, Clock, Sparkles, Plane, Package, ShoppingBag, Factory, Briefcase, Bot, Plus, Shield, TrendingUp, ChevronRight, ChevronLeft, Filter, Zap, Cog, Building2, Wheat, Car, Cpu, Shirt, Smartphone, Stethoscope, Coffee, Dumbbell, Beaker, Gamepad2, X, Sun, Moon, Users } from 'lucide-react';
+import { Search, MapPin, Star, Clock, Sparkles, Plane, Package, ShoppingBag, Factory, Briefcase, Bot, Plus, Shield, TrendingUp, ChevronRight, ChevronLeft, Filter, Zap, Cog, Building2, Wheat, Car, Cpu, Shirt, Smartphone, Stethoscope, Coffee, Dumbbell, Beaker, Gamepad2, X, Sun, Moon, Users, Languages, Camera, Copy, Check, Volume2, RefreshCw, ChevronDown, Mic, MicOff } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import touristaLogo from '/TOURISTA AR 2.png';
@@ -31,6 +31,308 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
   const [filterOrder, setFilterOrder] = useState<string[]>([]);
   const [draggedFilter, setDraggedFilter] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+
+  // ── Translate Scanner state ──────────────────────────────────────────────
+  const [showTranslate, setShowTranslate]         = useState(false);
+  const [translateTab, setTranslateTab]           = useState<'scan' | 'ai'>('scan');
+  const [scanText, setScanText]                   = useState('');
+  const [translatedText, setTranslatedText]       = useState('');
+  const [isTranslating, setIsTranslating]         = useState(false);
+  const [translateFrom, setTranslateFrom]         = useState('auto');
+  const [translateTo, setTranslateTo]             = useState('en');
+  const [copied, setCopied]                       = useState(false);
+  const [aiQuestion, setAiQuestion]               = useState('');
+  const [aiAnswer, setAiAnswer]                   = useState('');
+  const [isAiLoading, setIsAiLoading]             = useState(false);
+  const [showFromDropdown, setShowFromDropdown]   = useState(false);
+  const [showToDropdown, setShowToDropdown]       = useState(false);
+  const [isListening, setIsListening]             = useState(false);
+  const [isListeningAi, setIsListeningAi]         = useState(false);
+
+  // Voice recognition for scan tab
+  const startVoiceInput = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Voice recognition is not supported in this browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = translateFrom === 'auto' ? 'en-US' : `${translateFrom}-US`;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setScanText(transcript);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
+  // Voice recognition for AI tab
+  const startVoiceInputAi = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Voice recognition is not supported in this browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListeningAi(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setAiQuestion(transcript);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListeningAi(false);
+    };
+
+    recognition.onend = () => {
+      setIsListeningAi(false);
+    };
+
+    recognition.start();
+  };
+
+  const stopVoiceInput = () => {
+    setIsListening(false);
+    setIsListeningAi(false);
+  };
+
+  // OCR - Image text scanning using OCR.space free API
+  const [isOcrProcessing, setIsOcrProcessing] = useState(false);
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setScanText('Image too large. Please use a smaller image (max 5MB).');
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setScanText('Please select a valid image file.');
+      return;
+    }
+
+    setIsOcrProcessing(true);
+    setScanText('');
+
+    try {
+      // Resize image before sending to OCR API
+      const resizedFile = await resizeImage(file, 800, 800);
+      
+      const formData = new FormData();
+      formData.append('file', resizedFile);
+      formData.append('language', translateFrom === 'auto' ? 'eng' : translateFrom);
+      formData.append('isOverlayRequired', 'false');
+      formData.append('detectOrientation', 'true');
+      formData.append('scale', 'true');
+      formData.append('OCREngine', '2');
+
+      const response = await fetch('https://api.ocr.space/parse/image', {
+        method: 'POST',
+        headers: {
+          'apikey': 'helloworld', // Free API key for demo
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.IsErroredOnProcessing) {
+        // Try fallback OCR using Tesseract.js if available, otherwise show error
+        console.warn('OCR API failed:', data.ErrorMessage);
+        setScanText('OCR service unavailable. Please try again later or use manual input.');
+      } else if (data.ParsedResults && data.ParsedResults.length > 0) {
+        const extractedText = data.ParsedResults.map((result: any) => result.ParsedText).join('\n');
+        const trimmedText = extractedText.trim();
+        if (trimmedText) {
+          setScanText(trimmedText);
+        } else {
+          setScanText('No text detected in the image. Please try with a clearer image.');
+        }
+      } else {
+        setScanText('No text detected in the image. Please try with a clearer image.');
+      }
+    } catch (error) {
+      console.error('OCR Error:', error);
+      setScanText('Failed to scan image. Please check your connection and try again.');
+    } finally {
+      setIsOcrProcessing(false);
+      // Reset file input
+      event.target.value = '';
+    }
+  };
+
+  // Helper function to resize images
+  const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate scaling factor
+          const scaleFactor = Math.min(maxWidth / width, maxHeight / height);
+          if (scaleFactor < 1) {
+            width *= scaleFactor;
+            height *= scaleFactor;
+          }
+
+          // Create canvas and draw resized image
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob((blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                resolve(file);
+              }
+            }, 'image/jpeg', 0.9);
+          } else {
+            resolve(file);
+          }
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const LANGUAGES = [
+    { code: 'auto', name: 'Auto-detect' },
+    { code: 'en',   name: 'English'     },
+    { code: 'zh',   name: 'Chinese'     },
+    { code: 'fr',   name: 'French'      },
+    { code: 'es',   name: 'Spanish'     },
+    { code: 'ar',   name: 'Arabic'      },
+    { code: 'sw',   name: 'Swahili'     },
+    { code: 'pt',   name: 'Portuguese'  },
+    { code: 'hi',   name: 'Hindi'       },
+    { code: 'ja',   name: 'Japanese'    },
+    { code: 'ko',   name: 'Korean'      },
+    { code: 'de',   name: 'German'      },
+    { code: 'ru',   name: 'Russian'     },
+    { code: 'sn',   name: 'Shona'       },
+    { code: 'zu',   name: 'Zulu'        },
+  ];
+
+  const getLangName = (code: string) =>
+    LANGUAGES.find(l => l.code === code)?.name ?? code;
+
+  // Translate via Google Translate free endpoint (no API key needed for basic use)
+  const handleTranslate = async () => {
+    if (!scanText.trim()) return;
+    setIsTranslating(true);
+    setTranslatedText('');
+    try {
+      const from = translateFrom === 'auto' ? 'auto' : translateFrom;
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${translateTo}&dt=t&q=${encodeURIComponent(scanText)}`;
+      const res  = await fetch(url);
+      const data = await res.json();
+      // Response shape: [ [ ["translatedText","originalText",...], ...], null, sourceLang ]
+      const result = (data[0] as any[])
+        .map((chunk: any[]) => chunk[0])
+        .filter(Boolean)
+        .join('');
+      setTranslatedText(result);
+    } catch {
+      setTranslatedText('Translation failed. Check your connection and try again.');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  // Ask Touri AI for translation help
+  const handleAiTranslate = async () => {
+    if (!aiQuestion.trim()) return;
+    setIsAiLoading(true);
+    setAiAnswer('');
+    try {
+      const apiKey = process.env.VITE_AI_API_KEY;
+      const baseUrl = process.env.VITE_AI_BASE_URL || 'https://api.deepseek.com/v1';
+      
+      const res = await fetch(`${baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: `You are Touri, the AI assistant for the Tourista AR app — a travel and trade platform connecting China and Africa. The user needs translation or language help. Be concise, accurate, and friendly. If they paste text, translate it and also explain any cultural context that would be helpful for a traveler or trader.\n\nUser: ${aiQuestion}`
+          }]
+        })
+      });
+      const data = await res.json();
+      setAiAnswer(data.choices?.[0]?.message?.content ?? 'Touri is unavailable right now. Please try again.');
+    } catch {
+      setAiAnswer('Could not reach Touri AI. Check your connection and try again.');
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleSpeak = (text: string, lang: string) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang === 'auto' ? 'en' : lang;
+      speechSynthesis.speak(utterance);
+    }
+  };
 
   useEffect(() => {
     if (appMode === 'tourism') {
@@ -228,18 +530,50 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
               Trade
             </button>
           </div>
-          {/* Dark Mode Toggle */}
-          <button
-            onClick={onToggleDarkMode}
-            className="ml-3 p-2 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition"
-            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {darkMode ? (
-              <Sun className="w-5 h-5" />
-            ) : (
-              <Moon className="w-5 h-5" />
+          {/* Settings Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
+              className="ml-2 p-2 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition"
+              aria-label="Settings menu"
+            >
+              <Cog className="w-5 h-5" />
+            </button>
+            {/* Dropdown Menu */}
+            {showSettingsDropdown && (
+              <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-xl border border-gray-100 py-2 min-w-[160px] z-50">
+                <button
+                  onClick={() => {
+                    setShowTranslate(true);
+                    setShowSettingsDropdown(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition text-left"
+                >
+                  <Languages className="w-5 h-5 text-blue-600" />
+                  <span className="text-sm font-medium">Translate</span>
+                </button>
+                <button
+                  onClick={() => {
+                    onToggleDarkMode();
+                    setShowSettingsDropdown(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition text-left"
+                >
+                  {darkMode ? (
+                    <>
+                      <Sun className="w-5 h-5 text-amber-500" />
+                      <span className="text-sm font-medium">Light Mode</span>
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="w-5 h-5 text-gray-600" />
+                      <span className="text-sm font-medium">Dark Mode</span>
+                    </>
+                  )}
+                </button>
+              </div>
             )}
-          </button>
+          </div>
         </div>
 
         {/* Search Bar */}
@@ -749,7 +1083,336 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
         )}
       </AnimatePresence>
 
+      {/* Translation Scanner Modal */}
+      <AnimatePresence>
+        {showTranslate && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white rounded-2xl max-w-md w-full max-h-[85vh] overflow-hidden"
+            >
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Languages className="w-6 h-6" />
+                  <h2 className="text-xl font-bold">Translate Scanner</h2>
+                </div>
+                <button
+                  onClick={() => setShowTranslate(false)}
+                  className="p-2 hover:bg-white/20 rounded-full transition"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
 
+              {/* Tab Switcher */}
+              <div className="flex border-b border-gray-200">
+                <button
+                  onClick={() => setTranslateTab('scan')}
+                  className={`flex-1 py-3 text-sm font-semibold transition ${
+                    translateTab === 'scan'
+                      ? 'text-blue-600 border-b-2 border-blue-600'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Text Scanner
+                </button>
+                <button
+                  onClick={() => setTranslateTab('ai')}
+                  className={`flex-1 py-3 text-sm font-semibold transition ${
+                    translateTab === 'ai'
+                      ? 'text-blue-600 border-b-2 border-blue-600'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Touri AI
+                </button>
+              </div>
+
+              {/* Scan Tab */}
+              {translateTab === 'scan' && (
+                <div className="p-4 space-y-4">
+                  {/* Language Selection */}
+                  <div className="flex items-center justify-between">
+                    <div className="relative">
+                      <button
+                        onClick={() => {
+                          setShowFromDropdown(true);
+                          setShowToDropdown(false);
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                      >
+                        <span className="font-semibold">{getLangName(translateFrom)}</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      {showFromDropdown && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 w-40 z-10"
+                        >
+                          {LANGUAGES.map((lang) => (
+                            <button
+                              key={lang.code}
+                              onClick={() => {
+                                setTranslateFrom(lang.code);
+                                setShowFromDropdown(false);
+                              }}
+                              className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition ${
+                                translateFrom === lang.code ? 'bg-blue-50 text-blue-600' : ''
+                              }`}
+                            >
+                              {lang.name}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        const temp = translateFrom;
+                        setTranslateFrom(translateTo);
+                        setTranslateTo(temp);
+                      }}
+                      className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
+
+                    <div className="relative">
+                      <button
+                        onClick={() => {
+                          setShowToDropdown(true);
+                          setShowFromDropdown(false);
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                      >
+                        <span className="font-semibold">{getLangName(translateTo)}</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      {showToDropdown && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="absolute top-full right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 w-40 z-10"
+                        >
+                          {LANGUAGES.filter(l => l.code !== 'auto').map((lang) => (
+                            <button
+                              key={lang.code}
+                              onClick={() => {
+                                setTranslateTo(lang.code);
+                                setShowToDropdown(false);
+                              }}
+                              className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition ${
+                                translateTo === lang.code ? 'bg-blue-50 text-blue-600' : ''
+                              }`}
+                            >
+                              {lang.name}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Input Area */}
+                  <div>
+                    {/* Camera and Text Row */}
+                    <div className="relative flex items-start gap-2 mb-2">
+                      {/* Camera Button */}
+                      <label
+                        className={`flex-shrink-0 p-3 rounded-xl cursor-pointer transition ${
+                          isOcrProcessing
+                            ? 'bg-blue-100 animate-pulse'
+                            : 'bg-gray-100 hover:bg-gray-200'
+                        }`}
+                      >
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={handleImageUpload}
+                          disabled={isOcrProcessing}
+                          className="hidden"
+                        />
+                        {isOcrProcessing ? (
+                          <RefreshCw className="w-5 h-5 text-blue-600 animate-spin" />
+                        ) : (
+                          <Camera className="w-5 h-5 text-gray-600" />
+                        )}
+                      </label>
+                      {/* Textarea */}
+                      <textarea
+                        value={scanText}
+                        onChange={(e) => setScanText(e.target.value)}
+                        placeholder="Enter text to translate, or paste scanned text..."
+                        className="flex-1 h-32 p-4 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      />
+                    </div>
+                    {/* Mic Button - aligned right */}
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={isListening ? stopVoiceInput : startVoiceInput}
+                        className={`p-2 rounded-full transition ${
+                          isListening
+                            ? 'bg-red-500 text-white animate-pulse'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                        aria-label={isListening ? 'Stop listening' : 'Start voice input'}
+                      >
+                        {isListening ? (
+                          <MicOff className="w-5 h-5" />
+                        ) : (
+                          <Mic className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <button
+                    onClick={handleTranslate}
+                    disabled={!scanText.trim() || isTranslating}
+                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isTranslating ? (
+                      <>
+                        <RefreshCw className="w-5 h-5 animate-spin" />
+                        Translating...
+                      </>
+                    ) : (
+                      <>Translate</>
+                    )}
+                  </button>
+
+                  {/* Output Area */}
+                  {translatedText && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-gray-50 rounded-xl p-4"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-gray-700">Translation</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleSpeak(translatedText, translateTo)}
+                            className="p-2 hover:bg-gray-200 rounded-lg transition"
+                          >
+                            <Volume2 className="w-5 h-5 text-gray-600" />
+                          </button>
+                          <button
+                            onClick={() => handleCopy(translatedText)}
+                            className="p-2 hover:bg-gray-200 rounded-lg transition"
+                          >
+                            {copied ? (
+                              <Check className="w-5 h-5 text-green-600" />
+                            ) : (
+                              <Copy className="w-5 h-5 text-gray-600" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-gray-900">{translatedText}</p>
+                    </motion.div>
+                  )}
+                </div>
+              )}
+
+              {/* AI Tab */}
+              {translateTab === 'ai' && (
+                <div className="p-4 space-y-4">
+                  <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4">
+                    <p className="text-sm text-gray-700">
+                      <span className="font-bold text-purple-600">Touri AI</span> can help with translations, cultural explanations, and travel tips. Ask away!
+                    </p>
+                  </div>
+
+                  <div className="relative">
+                    <textarea
+                      value={aiQuestion}
+                      onChange={(e) => setAiQuestion(e.target.value)}
+                      placeholder="Ask Touri AI about translations, cultural context, or travel advice..."
+                      className="w-full h-32 p-4 pr-12 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={isListeningAi ? stopVoiceInput : startVoiceInputAi}
+                      className={`absolute bottom-3 right-3 p-2 rounded-full transition ${
+                        isListeningAi
+                          ? 'bg-red-500 text-white animate-pulse'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                      aria-label={isListeningAi ? 'Stop listening' : 'Start voice input'}
+                    >
+                      {isListeningAi ? (
+                        <MicOff className="w-5 h-5" />
+                      ) : (
+                        <Mic className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={handleAiTranslate}
+                    disabled={!aiQuestion.trim() || isAiLoading}
+                    className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isAiLoading ? (
+                      <>
+                        <RefreshCw className="w-5 h-5 animate-spin" />
+                        Asking Touri...
+                      </>
+                    ) : (
+                      <>
+                        <Bot className="w-5 h-5" />
+                        Ask Touri AI
+                      </>
+                    )}
+                  </button>
+
+                  {aiAnswer && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-gray-50 rounded-xl p-4"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Bot className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <p className="text-gray-900">{aiAnswer}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Close dropdowns when clicking outside */}
+      {showFromDropdown || showToDropdown ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-0"
+          onClick={() => {
+            setShowFromDropdown(false);
+            setShowToDropdown(false);
+          }}
+        />
+      ) : null}
 
       {/* AI Assistant Button */}
       {console.log('HomeScreen rendering AIButton, isAssistantOpen:', isAssistantOpen)}

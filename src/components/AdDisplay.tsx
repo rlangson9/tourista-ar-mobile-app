@@ -137,6 +137,53 @@ const mockAds: AdData[] = [
       regions: ['china'],
       categories: ['modern', 'luxury']
     }
+  },
+  {
+    id: 'AD005',
+    title: 'Cape Town Adventure',
+    description: 'Experience the beauty of Cape Town with stunning coastal tours',
+    imageUrl: 'https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=800',
+    advertiser: 'South Africa Travel',
+    category: 'tourism',
+    type: 'card',
+    targetUrl: 'tour-details',
+    targetItemId: '5',
+    ctaText: 'Explore',
+    budget: 2500,
+    status: 'active',
+    startDate: '2026-03-01',
+    endDate: '2026-06-30',
+    impressions: 7200,
+    clicks: 389,
+    ctr: 5.40,
+    priority: 7,
+    targeting: {
+      regions: ['africa'],
+      categories: ['adventure', 'nature']
+    }
+  },
+  {
+    id: 'AD006',
+    title: 'China Wholesale Market',
+    description: 'Direct from Chinese manufacturers - competitive prices',
+    imageUrl: 'https://images.unsplash.com/photo-1534224034816-dc455457a020?w=800',
+    advertiser: 'China Trade Hub',
+    category: 'trade',
+    type: 'card',
+    targetUrl: 'explore',
+    ctaText: 'View Products',
+    budget: 3000,
+    status: 'active',
+    startDate: '2026-03-01',
+    endDate: '2026-06-30',
+    impressions: 8500,
+    clicks: 462,
+    ctr: 5.44,
+    priority: 7,
+    targeting: {
+      categories: ['wholesale', 'manufacturing'],
+      userTypes: ['business']
+    }
   }
 ];
 
