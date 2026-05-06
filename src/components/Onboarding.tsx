@@ -193,7 +193,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               transition={{ delay: 0.3 }}
               className="text-3xl font-bold mb-4 leading-tight"
             >
-              Connecting China & Africa through immersive travel and intelligent trade solutions
+              Connecting China & the world through immersive travel and intelligent trade solutions
             </motion.h1>
             
             <motion.p
