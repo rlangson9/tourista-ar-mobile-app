@@ -404,7 +404,7 @@ export function ExploreScreen({ onNavigate, appMode }: ExploreScreenProps) {
       </div>
 
       {/* Banner Ad */}
-      <div className="mb-6">
+      <div className="mb-100">
         <AdDisplay
           type="banner"
           position="search"
