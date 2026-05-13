@@ -4,7 +4,7 @@ import { ChevronRight, ChevronDown, Globe, Briefcase, Compass, User, Building2, 
 import touristaLogo from '/TOURISTA AR 2.png';
 
 interface OnboardingProps {
-  onComplete: () => void;
+  onComplete: (language: string) => void;
 }
 
 const languages = [
@@ -104,7 +104,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     if (step < 4) {
       setStep(step + 1);
     } else {
-      onComplete();
+      onComplete(selectedLanguage);
     }
   };
 
@@ -979,7 +979,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.7 }}
-              onClick={onComplete}
+              onClick={() => onComplete(selectedLanguage)}
               className="bg-white text-blue-600 px-10 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center gap-2"
             >
               Explore

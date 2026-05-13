@@ -60,6 +60,7 @@ export default function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
   const [adminLoginError, setAdminLoginError] = useState('');
+  const [language, setLanguage] = useState<string>('en');
 
   // Check for admin login URL on initial load
   useEffect(() => {
@@ -102,7 +103,8 @@ export default function App() {
     setCurrentScreen(screen);
   };
 
-  const handleOnboardingComplete = () => {
+  const handleOnboardingComplete = (selectedLanguage: string) => {
+    setLanguage(selectedLanguage);
     setHasCompletedOnboarding(true);
     setCurrentScreen('home');
   };
@@ -323,9 +325,9 @@ export default function App() {
               onSwitchToPartner={switchToPartnerDashboard}
               appMode={appMode}
               onModeChange={setAppMode}
-              language="en"
+              language={language}
               currency="USD"
-              onLanguageChange={() => {}}
+              onLanguageChange={setLanguage}
               onCurrencyChange={() => {}}
               darkMode={false}
               onToggleDarkMode={() => {}}

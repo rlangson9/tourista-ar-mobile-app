@@ -1,3 +1,5 @@
+import { getVamboClient, isAfricanLanguage, SUPPORTED_AFRICAN_LANGUAGES } from './vamboService';
+
 export interface Holiday {
   name: string;
   date: string;
@@ -19,6 +21,79 @@ export interface CountryCulturalData {
   languageTips: string[];
   funFacts: string[];
 }
+
+export const translateText = async (text: string, targetLanguage: string, sourceLanguage: string = 'en'): Promise<string> => {
+  if (targetLanguage === sourceLanguage) return text;
+  
+  if (!isAfricanLanguage(targetLanguage)) {
+    return text;
+  }
+
+  const vamboClient = getVamboClient();
+  if (!vamboClient) {
+    console.warn('Vambo client not available, falling back to default text');
+    return text;
+  }
+
+  try {
+    const result = await vamboClient.translate(text, sourceLanguage, targetLanguage);
+    return result;
+  } catch (error) {
+    console.error('Vambo translation error:', error);
+    return text;
+  }
+};
+
+export const translateCulturalData = async (
+  country: string,
+  targetLanguage: string
+): Promise<CountryCulturalData | null> => {
+  const data = getCulturalData(country);
+  if (!data) return null;
+
+  if (!isAfricanLanguage(targetLanguage)) {
+    return data;
+  }
+
+  try {
+    const translatedHolidays = await Promise.all(
+      data.holidays.map(async (holiday) => ({
+        ...holiday,
+        name: await translateText(holiday.name, targetLanguage),
+        description: await translateText(holiday.description, targetLanguage),
+      }))
+    );
+
+    const translatedCustoms = await Promise.all(
+      data.customs.map(async (custom) => ({
+        ...custom,
+        title: await translateText(custom.title, targetLanguage),
+        description: await translateText(custom.description, targetLanguage),
+      }))
+    );
+
+    const translatedLanguageTips = await Promise.all(
+      data.languageTips.map((tip) => translateText(tip, targetLanguage))
+    );
+
+    const translatedFunFacts = await Promise.all(
+      data.funFacts.map((fact) => translateText(fact, targetLanguage))
+    );
+
+    return {
+      country: data.country,
+      holidays: translatedHolidays,
+      customs: translatedCustoms,
+      languageTips: translatedLanguageTips,
+      funFacts: translatedFunFacts,
+    };
+  } catch (error) {
+    console.error('Error translating cultural data:', error);
+    return data;
+  }
+};
+
+export { SUPPORTED_AFRICAN_LANGUAGES, isAfricanLanguage };
 
 export const culturalData: Record<string, CountryCulturalData> = {
   'China': {

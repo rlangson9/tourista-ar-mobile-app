@@ -427,7 +427,7 @@ export function ExploreScreen({ onNavigate, appMode }: ExploreScreenProps) {
         ) : (
           isTradeMode ? (
             <>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 pt-[11px] pb-[11px]">
                 {items.slice(0, 4).map((product) => (
                   <ProductCard key={product.id} product={product} onNavigate={onNavigate} />
                 ))}
