@@ -18,6 +18,9 @@ import paymentRoutes from './routes/payment.js';
 import bookingRoutes from './routes/booking.js';
 import uploadRoutes from './routes/upload.js';
 import orderRoutes from './routes/order.js';
+import translateRoutes from './routes/translate.js';
+import registrationRoutes from './routes/registration.js';
+import productRoutes from './routes/product.js';
 
 // Import rate limiters
 import { apiLimiter } from './middleware/rateLimit.js';
@@ -153,6 +156,74 @@ app.get('/health', (_req, res) => {
   });
 });
 
+// ── AI Health check ──────────────────────────────────────────────────────────
+app.get('/health/ai', async (_req, res) => {
+  const TOURI_AI_BASE_URL = process.env.TOURI_AI_BASE_URL || 'http://localhost:8000';
+  const AI_API_KEY = process.env.AI_API_KEY;
+  const AI_BASE_URL = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
+
+  // Check TOURI AI Model first
+  try {
+    const touriResponse = await fetch(`${TOURI_AI_BASE_URL}/health`, {
+      method: 'GET',
+    });
+
+    if (touriResponse.ok) {
+      const touriData = await touriResponse.json();
+      return res.json({
+        success: true,
+        status: 'healthy',
+        message: '✅ AI Model is ready!',
+        provider: 'TOURI_AI',
+        model_info: touriData,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  } catch (touriError) {
+    console.log('TOURI AI not available:', touriError);
+  }
+
+  // Fallback to DeepSeek
+  if (!AI_API_KEY) {
+    return res.status(503).json({
+      success: false,
+      status: 'unavailable',
+      message: 'AI API key not configured',
+    });
+  }
+
+  try {
+    const response = await fetch(`${AI_BASE_URL}/models`, {
+      headers: {
+        'Authorization': `Bearer ${AI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      res.json({
+        success: true,
+        status: 'healthy',
+        message: '✅ AI Model is ready!',
+        provider: 'DeepSeek',
+        timestamp: new Date().toISOString(),
+      });
+    } else {
+      res.status(response.status).json({
+        success: false,
+        status: 'unavailable',
+        message: `AI API returned status ${response.status}`,
+      });
+    }
+  } catch (error: any) {
+    res.status(503).json({
+      success: false,
+      status: 'unavailable',
+      message: `AI API error: ${error.message}`,
+    });
+  }
+});
+
 // ── Database health endpoint ──────────────────────────────────────────────────
 app.get('/health/db', async (_req, res) => {
   try {
@@ -192,6 +263,9 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/translate', translateRoutes);
+app.use('/api/registration', registrationRoutes);
+app.use('/api/products', productRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

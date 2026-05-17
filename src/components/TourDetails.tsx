@@ -301,7 +301,7 @@ export function TourDetails({ tourId, onNavigate }: TourDetailsProps) {
         </div>
 
         {/* Image Indicators */}
-        <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm" style={{ left: '373px' }}>
+        <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white pl-[2px] pr-[2px] py-1 rounded-full text-sm" style={{ left: '373px', marginLeft: '-5px', marginRight: '-5px' }}>
           {selectedImage + 1} / {images.length}
         </div>
       </div>

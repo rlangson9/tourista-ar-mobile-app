@@ -4,7 +4,7 @@ import User from '../models/User.js';
 import Partner from '../models/Partner.js';
 import Supplier from '../models/Supplier.js';
 import Tour from '../models/Tour.js';
-import Product from '../models/Product.js';
+import { Product } from '../models/Product.js';
 import Booking from '../models/Booking.js';
 import Order from '../models/Order.js';
 import nodemailer from 'nodemailer';

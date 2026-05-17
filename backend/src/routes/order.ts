@@ -1,7 +1,7 @@
 import express from 'express';
 import { protect, supplier, admin } from '../middleware/auth.js';
 import Order from '../models/Order.js';
-import Product from '../models/Product.js';
+import { Product } from '../models/Product.js';
 import Supplier from '../models/Supplier.js';
 import { orderValidation } from '../middleware/validation.js';
 

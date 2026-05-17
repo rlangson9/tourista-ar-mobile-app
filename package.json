@@ -4,9 +4,12 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"npm run dev:app\" \"npm run dev:admin\" \"npm run dev:backend\"",
+    "dev:full": "./start-all.sh",
     "dev:app": "vite --port 3000 --host",
     "dev:admin": "vite --port 3001 --host --strictPort",
     "dev:backend": "cd backend && npm run dev",
+    "dev:touri": "concurrently \"npm run dev:touri:ai\" \"npm run dev:app\" \"npm run dev:admin\" \"npm run dev:backend\"",
+    "dev:touri:ai": "./run-touri-ai.sh",
     "build": "tsc && vite build",
     "build-no-tsc": "vite build",
     "preview": "vite preview",

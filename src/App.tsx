@@ -6,6 +6,7 @@ import { TourDetails } from './components/TourDetails';
 import { ARExperience } from './components/ARExperience';
 import { BookingFlow } from './components/BookingFlow';
 import { ProfileScreen } from './components/ProfileScreen';
+import { About } from './components/About';
 import { BookingsScreen } from './components/BookingsScreen';
 import { PartnerDashboard } from './components/PartnerDashboard';
 import { SupplierDashboard } from './components/SupplierDashboard';
@@ -30,6 +31,7 @@ export type Screen =
   | 'booking'
   | 'bookings'
   | 'profile'
+  | 'about'
   | 'partner-dashboard'
   | 'supplier-dashboard'
   | 'admin-dashboard'
@@ -331,6 +333,13 @@ export default function App() {
               onCurrencyChange={() => {}}
               darkMode={false}
               onToggleDarkMode={() => {}}
+            />
+          )}
+
+          {currentScreen === 'about' && (
+            <About 
+              onNavigate={handleNavigate}
+              language={language}
             />
           )}
 

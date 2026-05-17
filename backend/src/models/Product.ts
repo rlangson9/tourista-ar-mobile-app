@@ -1,169 +1,52 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
-interface ProductDocument extends mongoose.Document {
-  supplierId: mongoose.Schema.Types.ObjectId;
+export interface IProduct extends Document {
+  product_id: string;
+  supplier_id: string;
   name: string;
-  description: string;
+  name_zh: string;
   category: string;
-  subcategory: string;
+  description: string;
+  description_zh: string;
   price: number;
   currency: string;
-  discount: number;
+  available_quantity: number;
+  min_order_quantity: number;
+  location: string;
   images: string[];
-  videoUrl: string;
-  sku: string;
-  stock: number;
-  minimumOrder: number;
-  weight: number;
-  weightUnit: string;
-  dimensions: {
-    length: number;
-    width: number;
-    height: number;
-    unit: string;
-  };
-  colors: string[];
-  variations: any[];
-  features: string[];
-  specifications: any[];
-  shippingInfo: string;
-  returnPolicy: string;
-  isFeatured: boolean;
-  isActive: boolean;
-  views: number;
-  orders: number;
-  rating: number;
-  reviewCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  status: 'active' | 'inactive' | 'out_of_stock';
+  created_at: Date;
+  updated_at: Date;
 }
 
-const productSchema = new mongoose.Schema<ProductDocument>({
-  supplierId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Supplier',
-    required: true,
-  },
-  name: {
-    type: String,
-    required: [true, 'Please provide a product name'],
-  },
-  description: {
-    type: String,
-    required: [true, 'Please provide a product description'],
-  },
-  category: {
-    type: String,
-    required: [true, 'Please select a product category'],
-  },
-  subcategory: {
-    type: String,
-    required: [true, 'Please select a product subcategory'],
-  },
-  price: {
-    type: Number,
-    required: [true, 'Please specify product price'],
-  },
-  currency: {
-    type: String,
-    default: 'USD',
-  },
-  discount: {
-    type: Number,
-    default: 0,
-  },
-  images: {
-    type: [String],
-    required: [true, 'Please upload at least one image'],
-  },
-  videoUrl: {
-    type: String,
-  },
-  sku: {
-    type: String,
-    required: [true, 'Please provide a SKU'],
-  },
-  stock: {
-    type: Number,
-    required: [true, 'Please specify stock quantity'],
-  },
-  minimumOrder: {
-    type: Number,
-    default: 1,
-  },
-  weight: {
-    type: Number,
-  },
-  weightUnit: {
-    type: String,
-    default: 'kg',
-  },
-  dimensions: {
-    length: Number,
-    width: Number,
-    height: Number,
-    unit: {
+const ProductSchema = new Schema<IProduct>(
+  {
+    product_id: { type: String, required: true, unique: true },
+    supplier_id: { type: String, required: true },
+    name: { type: String, required: true },
+    name_zh: { type: String, default: '' },
+    category: { type: String, required: true },
+    description: { type: String, default: '' },
+    description_zh: { type: String, default: '' },
+    price: { type: Number, required: true, min: 0 },
+    currency: { type: String, default: 'USD' },
+    available_quantity: { type: Number, default: 0, min: 0 },
+    min_order_quantity: { type: Number, default: 1, min: 1 },
+    location: { type: String, default: '' },
+    images: [{ type: String }],
+    status: {
       type: String,
-      default: 'cm',
+      enum: ['active', 'inactive', 'out_of_stock'],
+      default: 'active'
     },
   },
-  colors: {
-    type: [String],
-    default: [],
-  },
-  variations: {
-    type: [Object],
-    default: [],
-  },
-  features: {
-    type: [String],
-    default: [],
-  },
-  specifications: {
-    type: [Object],
-    default: [],
-  },
-  shippingInfo: {
-    type: String,
-  },
-  returnPolicy: {
-    type: String,
-  },
-  isFeatured: {
-    type: Boolean,
-    default: false,
-  },
-  isActive: {
-    type: Boolean,
-    default: true,
-  },
-  views: {
-    type: Number,
-    default: 0,
-  },
-  orders: {
-    type: Number,
-    default: 0,
-  },
-  rating: {
-    type: Number,
-    default: 0,
-  },
-  reviewCount: {
-    type: Number,
-    default: 0,
-  },
-}, {
-  timestamps: true,
-});
+  { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
+);
 
-// Add indexes for better query performance
-productSchema.index({ supplierId: 1 });
-productSchema.index({ category: 1 });
-productSchema.index({ isFeatured: 1, rating: -1 });
-productSchema.index({ price: 1 });
-productSchema.index({ stock: 1 });
+ProductSchema.index({ product_id: 1 });
+ProductSchema.index({ supplier_id: 1 });
+ProductSchema.index({ category: 1 });
+ProductSchema.index({ status: 1 });
+ProductSchema.index({ price: 1 });
 
-const Product = mongoose.model<ProductDocument>('Product', productSchema);
-
-export default Product;
+export const Product = mongoose.model<IProduct>('Product', ProductSchema);

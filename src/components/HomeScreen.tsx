@@ -1156,7 +1156,8 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
                         <motion.div
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 w-40 z-10"
+                          className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 w-40 z-10 max-h-64 overflow-y-auto"
+                          style={{ maxHeight: '256px', overflowY: 'auto' }}
                         >
                           {LANGUAGES.map((lang) => (
                             <button
@@ -1202,7 +1203,8 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
                         <motion.div
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="absolute top-full right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 w-40 z-10"
+                          className="absolute top-full right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 w-40 z-10 max-h-64 overflow-y-auto"
+                          style={{ maxHeight: '256px', overflowY: 'auto' }}
                         >
                           {LANGUAGES.filter(l => l.code !== 'auto').map((lang) => (
                             <button
