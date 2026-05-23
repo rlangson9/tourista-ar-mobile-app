@@ -157,7 +157,8 @@ const authorizeUserAccess = (req: AuthenticatedRequest, res: express.Response, n
   }
 
   // Regular users can only access their own data
-  if (authenticatedUserId !== userId) {
+  // Convert both to strings to handle type mismatch (ObjectId vs string)
+  if (String(authenticatedUserId) !== String(userId)) {
     return res.status(403).json({
       success: false,
       error: 'You are not authorized to access or modify this user\'s loyalty data',
