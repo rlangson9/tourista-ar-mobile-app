@@ -289,17 +289,18 @@ System notifies internal team dashboard.
 
 🤖 AI INTEGRATION NOTE
 
-Integrate DeepSeek AI using API:
+Integrate Touri AI Model (proprietary China-Africa AI):
 
-sk-6b481a9ef3a5452b9a8c0d7785cdbbff
-
-AI handles:
+Touri AI handles:
 	•	Personalized home page
 	•	Trade recommendations
 	•	Tour suggestions
 	•	Sponsored prioritization
 	•	Smart search results
 	•	Preference-based ranking
+	•	Multi-language translation (Chinese, English, Shona, Ndebele, Zulu, Xhosa)
+	•	Buyer-supplier matching
+	•	Risk assessment for cross-border trade
 
 AI must adapt when user updates preferences.
 

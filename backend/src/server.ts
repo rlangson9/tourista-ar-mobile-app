@@ -166,10 +166,7 @@ app.get('/health', (_req, res) => {
 // ── AI Health check ──────────────────────────────────────────────────────────
 app.get('/health/ai', async (_req, res) => {
   const TOURI_AI_BASE_URL = process.env.TOURI_AI_BASE_URL || 'http://localhost:8000';
-  const AI_API_KEY = process.env.AI_API_KEY;
-  const AI_BASE_URL = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
 
-  // Check TOURI AI Model first
   try {
     const touriResponse = await fetch(`${TOURI_AI_BASE_URL}/health`, {
       method: 'GET',
@@ -180,53 +177,23 @@ app.get('/health/ai', async (_req, res) => {
       return res.json({
         success: true,
         status: 'healthy',
-        message: '✅ AI Model is ready!',
+        message: '✅ Touri AI Model is ready!',
         provider: 'TOURI_AI',
         model_info: touriData,
         timestamp: new Date().toISOString(),
       });
-    }
-  } catch (touriError) {
-    console.log('TOURI AI not available:', touriError);
-  }
-
-  // Fallback to DeepSeek
-  if (!AI_API_KEY) {
-    return res.status(503).json({
-      success: false,
-      status: 'unavailable',
-      message: 'AI API key not configured',
-    });
-  }
-
-  try {
-    const response = await fetch(`${AI_BASE_URL}/models`, {
-      headers: {
-        'Authorization': `Bearer ${AI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (response.ok) {
-      res.json({
-        success: true,
-        status: 'healthy',
-        message: '✅ AI Model is ready!',
-        provider: 'DeepSeek',
-        timestamp: new Date().toISOString(),
-      });
     } else {
-      res.status(response.status).json({
+      return res.status(503).json({
         success: false,
         status: 'unavailable',
-        message: `AI API returned status ${response.status}`,
+        message: `Touri AI returned status ${touriResponse.status}`,
       });
     }
   } catch (error: any) {
     res.status(503).json({
       success: false,
       status: 'unavailable',
-      message: `AI API error: ${error.message}`,
+      message: `Touri AI error: ${error.message}. Make sure Touri AI is running on ${TOURI_AI_BASE_URL}`,
     });
   }
 });
