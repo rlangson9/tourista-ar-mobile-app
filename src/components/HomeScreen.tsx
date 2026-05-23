@@ -292,18 +292,13 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
     setIsAiLoading(true);
     setAiAnswer('');
     try {
-      const apiKey = process.env.VITE_AI_API_KEY;
-      const baseUrl = process.env.VITE_AI_BASE_URL || 'https://api.deepseek.com/v1';
-      
-      const res = await fetch(`${baseUrl}/chat/completions`, {
+      const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: 'deepseek-chat',
-          max_tokens: 1000,
+          mode: appMode,
           messages: [{
             role: 'user',
             content: `You are Touri, the AI assistant for the Tourista AR app — a travel and trade platform connecting China and Africa. The user needs translation or language help. Be concise, accurate, and friendly. If they paste text, translate it and also explain any cultural context that would be helpful for a traveler or trader.\n\nUser: ${aiQuestion}`
@@ -311,7 +306,11 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
         })
       });
       const data = await res.json();
-      setAiAnswer(data.choices?.[0]?.message?.content ?? 'Touri is unavailable right now. Please try again.');
+      if (data.success) {
+        setAiAnswer(data.response);
+      } else {
+        setAiAnswer('Touri is unavailable right now. Please try again.');
+      }
     } catch {
       setAiAnswer('Could not reach Touri AI. Check your connection and try again.');
     } finally {

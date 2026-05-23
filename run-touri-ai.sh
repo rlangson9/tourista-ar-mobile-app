@@ -1,4 +1,19 @@
 #!/bin/bash
-export PYTHONPATH="/Volumes/Untitled/TOURI AI Model/Touri Ai:$PYTHONPATH"
-cd "/Volumes/Untitled/TOURI AI Model/Touri Ai/tourista_ai_model"
+
+# TOURI AI Model - Startup Script
+# Uses TOURI_AI_PATH environment variable if set, otherwise defaults to relative path
+
+TOURI_AI_PATH=${TOURI_AI_PATH:-"/Volumes/Untitled/TOURI AI Model/Touri Ai"}
+TOURI_AI_MODEL_PATH="$TOURI_AI_PATH/tourista_ai_model"
+
+# Check if TOURI AI model exists
+if [ ! -d "$TOURI_AI_MODEL_PATH" ]; then
+    echo "ERROR: TOURI AI Model not found at $TOURI_AI_MODEL_PATH"
+    echo "Please set TOURI_AI_PATH environment variable to the correct path"
+    exit 1
+fi
+
+# Set Python path and start the server
+export PYTHONPATH="$TOURI_AI_PATH:$PYTHONPATH"
+cd "$TOURI_AI_MODEL_PATH"
 python3 -m uvicorn api.endpoints:app --host 0.0.0.0 --port 8000

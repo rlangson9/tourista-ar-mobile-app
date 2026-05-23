@@ -80,12 +80,7 @@ export function AIAssistant({ isOpen, onToggle, appMode }: AIAssistantProps) {
     setError(null);
 
     try {
-      const apiKey = import.meta.env.VITE_AI_API_KEY;
-      const baseUrl = import.meta.env.VITE_AI_BASE_URL || 'https://api.deepseek.com/v1';
-
-      if (!apiKey) {
-        throw new Error('AI API key not configured. Add VITE_AI_API_KEY to your .env file.');
-      }
+      const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5002';
 
       // Build history excluding the initial welcome message
       const conversationHistory = updatedMessages.map((m) => ({
@@ -93,19 +88,17 @@ export function AIAssistant({ isOpen, onToggle, appMode }: AIAssistantProps) {
         content: m.content,
       }));
 
-      const response = await fetch(`${baseUrl}/chat/completions`, {
+      const response = await fetch(`${backendUrl}/api/ai/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: 'deepseek-chat',
-          max_tokens: 400,
           messages: [
             { role: 'system', content: SYSTEM_PROMPTS[appMode] },
             ...conversationHistory,
           ],
+          mode: appMode,
         }),
       });
 
@@ -116,7 +109,7 @@ export function AIAssistant({ isOpen, onToggle, appMode }: AIAssistantProps) {
 
       const data = await response.json();
       const assistantContent =
-        data.choices?.[0]?.message?.content ?? 'Sorry, I could not generate a response.';
+        data.response ?? 'Sorry, I could not generate a response.';
 
       setMessages((prev) => [...prev, { role: 'assistant', content: assistantContent }]);
     } catch (err) {

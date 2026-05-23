@@ -21,6 +21,8 @@ import orderRoutes from './routes/order.js';
 import translateRoutes from './routes/translate.js';
 import registrationRoutes from './routes/registration.js';
 import productRoutes from './routes/product.js';
+import aiRoutes from './routes/ai.js';
+import touriAiRoutes from './routes/touri_ai.js';
 
 // Import rate limiters
 import { apiLimiter } from './middleware/rateLimit.js';
@@ -126,6 +128,11 @@ app.use('/api', apiLimiter);
 
 // ── DB-required middleware ───────────────────────────────────────────────────
 app.use('/api', (req, res, next) => {
+  // Skip DB check for AI routes (AI chat doesn't need database)
+  if (req.path.startsWith('/ai') || req.path.startsWith('/touri-ai')) {
+    return next();
+  }
+  
   if (mongoose.connection.readyState !== 1) {
     return res.status(503).json({
       success: false,
@@ -266,6 +273,8 @@ app.use('/api/uploads', uploadRoutes);
 app.use('/api/translate', translateRoutes);
 app.use('/api/registration', registrationRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/touri-ai', touriAiRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

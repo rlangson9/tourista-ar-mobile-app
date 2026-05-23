@@ -17,20 +17,24 @@ NC='\033[0m' # No Color
 # Navigate to project root
 cd "$(dirname "$0")/.."
 
-# Check if TOURI AI model exists
-TOURI_AI_PATH="/Volumes/Untitled/TOURI AI Model/Touri Ai/tourista_ai_model"
+# TOURI AI Model path - uses environment variable if set
+TOURI_AI_PATH=${TOURI_AI_PATH:-"/Volumes/Untitled/TOURI AI Model/Touri Ai"}
+TOURI_AI_MODEL_PATH="$TOURI_AI_PATH/tourista_ai_model"
 
 echo -e "${YELLOW}Checking TOURI AI Model...${NC}"
-if [ -d "$TOURI_AI_PATH" ]; then
+if [ -d "$TOURI_AI_MODEL_PATH" ]; then
     echo -e "${GREEN}✓ TOURI AI Model found${NC}"
+    echo -e "${GREEN}  Path: $TOURI_AI_MODEL_PATH${NC}"
 else
-    echo -e "${YELLOW}⚠ TOURI AI Model not found at $TOURI_AI_PATH${NC}"
+    echo -e "${YELLOW}⚠ TOURI AI Model not found at $TOURI_AI_MODEL_PATH${NC}"
+    echo -e "${YELLOW}  Set TOURI_AI_PATH environment variable to the correct path${NC}"
 fi
 
 # Start TOURI AI Model (if available)
-if [ -d "$TOURI_AI_PATH" ]; then
+if [ -d "$TOURI_AI_MODEL_PATH" ]; then
     echo -e "${YELLOW}Starting TOURI AI Model on port 8000...${NC}"
-    cd "$TOURI_AI_PATH"
+    export PYTHONPATH="$TOURI_AI_PATH:$PYTHONPATH"
+    cd "$TOURI_AI_MODEL_PATH"
     python3 -m uvicorn api.endpoints:app --host 0.0.0.0 --port 8000 &
     TOURI_PID=$!
     echo -e "${GREEN}✓ TOURI AI Model started (PID: $TOURI_PID)${NC}"
