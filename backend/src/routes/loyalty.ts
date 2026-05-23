@@ -1,4 +1,5 @@
 import express from 'express';
+import { protect, AuthenticatedRequest } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -144,7 +145,29 @@ function getLevel(points: number): string {
   return level?.name || 'bronze';
 }
 
-router.get('/:userId', async (req, res) => {
+// Authorization middleware: Check if user is authorized to access/modify the specified user's data
+const authorizeUserAccess = (req: AuthenticatedRequest, res: express.Response, next: express.NextFunction) => {
+  const { userId } = req.params;
+  const authenticatedUserId = req.user?.id;
+  const authenticatedUserRole = req.user?.role;
+
+  // Admins can access any user's loyalty data
+  if (authenticatedUserRole === 'admin') {
+    return next();
+  }
+
+  // Regular users can only access their own data
+  if (authenticatedUserId !== userId) {
+    return res.status(403).json({
+      success: false,
+      error: 'You are not authorized to access or modify this user\'s loyalty data',
+    });
+  }
+
+  next();
+};
+
+router.get('/:userId', protect, authorizeUserAccess, async (req: AuthenticatedRequest, res) => {
   try {
     const { userId } = req.params;
     const loyalty = userLoyaltyData[userId] || {
@@ -168,7 +191,7 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
-router.get('/:userId/history', async (req, res) => {
+router.get('/:userId/history', protect, authorizeUserAccess, async (req: AuthenticatedRequest, res) => {
   try {
     const { userId } = req.params;
     const history = pointsHistoryData[userId] || [];
@@ -185,10 +208,25 @@ router.get('/:userId/history', async (req, res) => {
   }
 });
 
-router.post('/:userId/earn', async (req, res) => {
+router.post('/:userId/earn', protect, authorizeUserAccess, async (req: AuthenticatedRequest, res) => {
   try {
     const { userId } = req.params;
     const { amount, description, relatedItem } = req.body;
+
+    // Validate input
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Amount must be a positive number',
+      });
+    }
+
+    if (!description || typeof description !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Description is required',
+      });
+    }
 
     if (!userLoyaltyData[userId]) {
       userLoyaltyData[userId] = {
@@ -229,10 +267,18 @@ router.post('/:userId/earn', async (req, res) => {
   }
 });
 
-router.post('/:userId/redeem', async (req, res) => {
+router.post('/:userId/redeem', protect, authorizeUserAccess, async (req: AuthenticatedRequest, res) => {
   try {
     const { userId } = req.params;
     const { rewardId } = req.body;
+
+    // Validate input
+    if (!rewardId || typeof rewardId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Reward ID is required',
+      });
+    }
 
     if (!userLoyaltyData[userId]) {
       return res.status(404).json({
