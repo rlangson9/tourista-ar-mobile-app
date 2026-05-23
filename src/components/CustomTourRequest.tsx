@@ -1,8 +1,9 @@
-import { ArrowLeft, MapPin, Calendar, Users, DollarSign, Briefcase, Upload, Check, Sun, Building, Factory, Globe, GraduationCap, Info } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Users, DollarSign, Briefcase, Check, Sun, Building, Factory, Globe, GraduationCap, Info } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Screen } from '../App';
 import { mockCustomTourRequests, type CustomTourRequest } from '../data/mockData';
+import { ImageUpload } from './ImageUpload';
 
 interface CustomTourRequestProps {
   onNavigate: (screen: Screen) => void;
@@ -18,7 +19,7 @@ interface TourRequestData {
   budgetMax: string;
   purpose: string;
   requirements: string;
-  images: File[];
+  images: string[];
 }
 
 export function CustomTourRequest({ onNavigate }: CustomTourRequestProps) {
@@ -36,6 +37,10 @@ export function CustomTourRequest({ onNavigate }: CustomTourRequestProps) {
     requirements: '',
     images: [],
   });
+
+  const handleImagesChange = (newImages: string[]) => {
+    setFormData({ ...formData, images: newImages });
+  };
 
   const handleSubmit = () => {
     const newRequest: CustomTourRequest = {
@@ -318,20 +323,14 @@ export function CustomTourRequest({ onNavigate }: CustomTourRequestProps) {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Upload Reference Images (Optional)
-                    </label>
-                    <button className="w-full border-2 border-dashed border-gray-300 rounded-xl p-8 hover:border-blue-600 hover:bg-blue-50 transition text-center">
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm font-semibold text-gray-700">
-                        Click to upload images
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Share photos of places you'd like to visit
-                      </p>
-                    </button>
-                  </div>
+                  <ImageUpload
+                    images={formData.images}
+                    onImagesChange={handleImagesChange}
+                    label="Upload Reference Images (Optional)"
+                    aspectRatio="16:9 (Wide)"
+                    maxImages={5}
+                    hint="Share photos of places you'd like to visit"
+                  />
                 </div>
               </div>
 

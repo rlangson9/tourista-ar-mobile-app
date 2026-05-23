@@ -1,4 +1,4 @@
-import { ArrowLeft, User, MapPin, Heart, Wallet as WalletIcon, Globe, FileText, HelpCircle, LogOut, ChevronRight, Star, Calendar, Briefcase, Gift, Settings, Plane, Package, Shield, Award, Camera, Lock, Bell, CreditCard, Edit2, Check, CheckCircle, X } from 'lucide-react';
+import { ArrowLeft, User, MapPin, Heart, Wallet as WalletIcon, Globe, FileText, HelpCircle, LogOut, ChevronRight, Star, Calendar, Briefcase, Gift, Settings, Plane, Package, Shield, Award, Camera, Lock, Bell, CreditCard, Edit2, Check, CheckCircle, X, Coins } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Screen, AppMode } from '../App';
@@ -12,6 +12,7 @@ import { Wallet as WalletComponent } from './Wallet';
 import { CustomerSupportChat } from './CustomerSupportChat';
 import { TwoFactorAuth } from './TwoFactorAuth';
 import { BottomNav } from './BottomNav';
+import { LoyaltyPoints } from './LoyaltyPoints';
 
 interface ProfileScreenProps {
   onNavigate: (screen: Screen) => void;
@@ -42,6 +43,7 @@ export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeCh
   const [showWallet, setShowWallet] = useState(false);
   const [showCustomerSupportChat, setShowCustomerSupportChat] = useState(false);
   const [showTwoFactorAuth, setShowTwoFactorAuth] = useState(false);
+  const [showLoyaltyPoints, setShowLoyaltyPoints] = useState(false);
   const [connectedAccounts, setConnectedAccounts] = useState({
     google: false,
     facebook: true,
@@ -221,6 +223,15 @@ export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeCh
     return (
       <TwoFactorAuth
         onBack={() => setShowTwoFactorAuth(false)}
+      />
+    );
+  }
+
+  if (showLoyaltyPoints) {
+    return (
+      <LoyaltyPoints
+        initialPoints={loyaltyPoints}
+        onBack={() => setShowLoyaltyPoints(false)}
       />
     );
   }
@@ -449,13 +460,14 @@ export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeCh
             Earn points from bookings and trade deals. Redeem for discounts, reduced commissions, and exclusive access.
           </p>
 
-          {/* Convert Points Button */}
+          {/* View Details Button */}
           <button 
-            onClick={() => setShowConvertPointsModal(true)}
-            className="w-full bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition"
+            onClick={() => setShowLoyaltyPoints(true)}
+            className="w-full bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2"
             style={{ paddingTop: '0px', paddingBottom: '0px' }}
           >
-            Convert Points
+            <Coins className="w-5 h-5" />
+            View Rewards Details
           </button>
         </div>
 

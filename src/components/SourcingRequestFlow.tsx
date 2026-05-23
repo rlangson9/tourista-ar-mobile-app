@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ArrowLeft, Upload, X, Check } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Screen } from '../App';
+import { ImageUpload } from './ImageUpload';
 
 interface SourcingRequestFlowProps {
   onNavigate: (screen: Screen) => void;
@@ -113,33 +114,14 @@ export function SourcingRequestFlow({ onNavigate }: SourcingRequestFlowProps) {
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Upload Reference Images (Optional)
-                    </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-600 transition cursor-pointer">
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-600">
-                        Click to upload or drag and drop
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        PNG, JPG up to 10MB
-                      </p>
-                    </div>
-                    
-                    {uploadedImages.length > 0 && (
-                      <div className="flex gap-2 mt-3">
-                        {uploadedImages.map((img, idx) => (
-                          <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden">
-                            <img src={img} alt="" className="w-full h-full object-cover" />
-                            <button className="absolute top-1 right-1 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
-                              <X className="w-4 h-4 text-white" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <ImageUpload
+                    images={uploadedImages}
+                    onImagesChange={setUploadedImages}
+                    label="Upload Reference Images (Optional)"
+                    aspectRatio="4:5 (Product)"
+                    maxImages={5}
+                    hint="PNG, JPG up to 10MB"
+                  />
                 </div>
               </div>
             </motion.div>

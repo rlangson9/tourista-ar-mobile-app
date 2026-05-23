@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { X, Upload, Calendar, DollarSign, Target, TrendingUp, Eye, CheckCircle } from 'lucide-react';
+import { X, Calendar, DollarSign, Target, TrendingUp, Eye, CheckCircle } from 'lucide-react';
 import { useToast } from './ui/use-toast';
+import { ImageUpload } from './ImageUpload';
 
 interface AdCreationFormProps {
   onClose: () => void;
@@ -14,7 +15,7 @@ export interface AdFormData {
   targetAudience: string;
   budget: number;
   duration: number;
-  imageUrl?: string;
+  images: string[];
   startDate: string;
   endDate: string;
   ctaText: string;
@@ -30,7 +31,7 @@ export function AdCreationForm({ onClose, onSubmit, userType }: AdCreationFormPr
     targetAudience: '',
     budget: PRICING_PER_DAY,
     duration: 1,
-    imageUrl: '',
+    images: [],
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     ctaText: '',
@@ -38,11 +39,14 @@ export function AdCreationForm({ onClose, onSubmit, userType }: AdCreationFormPr
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof AdFormData, string>>>({});
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const { success, error } = useToast();
+  const { success } = useToast();
+
+  const handleImagesChange = (newImages: string[]) => {
+    setFormData(prev => ({ ...prev, images: newImages }));
+    if (newImages.length > 0) {
+      success('Image uploaded successfully');
+    }
+  };
 
   const validateForm = () => {
     const newErrors: Partial<Record<keyof AdFormData, string>> = {};
@@ -79,72 +83,6 @@ export function AdCreationForm({ onClose, onSubmit, userType }: AdCreationFormPr
   };
 
   const totalCost = formData.duration * PRICING_PER_DAY;
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      processImage(file);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      processImage(file);
-    }
-  };
-
-  const handleRemoveImage = () => {
-    setPreviewImage(null);
-    setFormData(prev => ({ ...prev, imageUrl: '' }));
-  };
-
-  const processImage = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      error('Please upload an image file');
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      error('Image size should not exceed 10MB');
-      return;
-    }
-
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const previewUrl = e.target?.result as string;
-      setPreviewImage(previewUrl);
-    };
-    reader.readAsDataURL(file);
-
-    // Simulate upload process
-    setIsUploading(true);
-    setUploadProgress(0);
-
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      setUploadProgress(progress);
-      if (progress >= 100) {
-        clearInterval(interval);
-        setIsUploading(false);
-        setFormData(prev => ({ ...prev, imageUrl: 'https://example.com/uploaded-image.jpg' }));
-        success('Image uploaded successfully');
-      }
-    }, 300);
-  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -226,68 +164,14 @@ export function AdCreationForm({ onClose, onSubmit, userType }: AdCreationFormPr
           <div className="space-y-4">
             <h3 className="font-semibold text-lg text-gray-900">Ad Creative</h3>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ad Image
-              </label>
-              {previewImage ? (
-                <div className="relative border border-gray-300 rounded-lg overflow-hidden">
-                  <img 
-                    src={previewImage} 
-                    alt="Preview" 
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="absolute top-2 right-2 flex gap-2">
-                    <button
-                      onClick={handleRemoveImage}
-                      className="bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition"
-                      title="Remove image"
-                    >
-                      <X className="w-4 h-4 text-gray-700" />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  className={`border-2 ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-dashed border-gray-300'} rounded-lg p-6 text-center hover:border-gray-400 transition cursor-pointer`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => document.getElementById('image-upload')?.click()}
-                >
-                  <input
-                    type="file"
-                    id="image-upload"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  {isUploading ? (
-                    <div className="space-y-4">
-                      <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center">
-                        <Upload className="w-8 h-8 text-blue-600" />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-gray-600">Uploading...</p>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
-                          <div 
-                            className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                            style={{ width: `${uploadProgress}%` }}
-                          ></div>
-                        </div>
-                        <p className="text-sm text-gray-500">{uploadProgress}%</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-600">Click to upload or drag and drop</p>
-                      <p className="text-sm text-gray-500 mt-1">PNG, JPG up to 10MB</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            <ImageUpload
+              images={formData.images}
+              onImagesChange={handleImagesChange}
+              label="Ad Image"
+              aspectRatio="16:9 (Wide)"
+              maxImages={1}
+              hint="PNG, JPG up to 10MB"
+            />
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

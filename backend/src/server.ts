@@ -23,6 +23,7 @@ import registrationRoutes from './routes/registration.js';
 import productRoutes from './routes/product.js';
 import aiRoutes from './routes/ai.js';
 import touriAiRoutes from './routes/touri_ai.js';
+import loyaltyRoutes from './routes/loyalty.js';
 
 // Import rate limiters
 import { apiLimiter } from './middleware/rateLimit.js';
@@ -242,6 +243,7 @@ app.use('/api/registration', registrationRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/touri-ai', touriAiRoutes);
+app.use('/api/loyalty', loyaltyRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
