@@ -344,7 +344,7 @@ export function LoyaltyPoints({ initialPoints = 2350, onBack }: LoyaltyPointsPro
         {/* Convert Points Button */}
         <motion.button
           onClick={() => setShowConversion(!showConversion)}
-          className="w-full bg-orange-500 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition flex items-center justify-between"
+          className="w-full bg-orange-500 rounded-2xl p-6 shadow-lg hover:shadow-xl transition flex items-center justify-between"
           style={{ color: '#f0f0f0' }}
           whileTap={{ scale: 0.98 }}
         >
