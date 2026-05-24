@@ -344,17 +344,18 @@ export function LoyaltyPoints({ initialPoints = 2350, onBack }: LoyaltyPointsPro
         {/* Convert Points Button */}
         <motion.button
           onClick={() => setShowConversion(!showConversion)}
-          className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition flex items-center justify-between"
+          className="w-full bg-orange-500 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition flex items-center justify-between"
+          style={{ color: '#f0f0f0' }}
           whileTap={{ scale: 0.98 }}
         >
-          <div className="flex items-center gap-3">
-            <Sparkles className="w-6 h-6" />
+          <div className="flex items-center gap-3" style={{ color: '#fe9a00' }}>
+            <Sparkles className="w-6 h-6" style={{ color: '#fe9a00' }} />
             <div className="text-left">
-              <h3 className="font-bold text-lg">Redeem Points</h3>
-              <p className="text-sm text-amber-100">Convert points to discounts & rewards</p>
+              <h3 className="font-bold text-lg" style={{ color: '#fe9a00' }}>Redeem Points</h3>
+              <p className="text-sm" style={{ color: '#434c5d' }}>Convert points to discounts & rewards</p>
             </div>
           </div>
-          <ChevronRight className={`w-6 h-6 transition-transform ${showConversion ? 'rotate-90' : ''}`} />
+          <ChevronRight className={`w-6 h-6 transition-transform ${showConversion ? 'rotate-90' : ''}`} style={{ color: '#fe9a00' }} />
         </motion.button>
 
         {/* Conversion Options */}
