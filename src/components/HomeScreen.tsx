@@ -1,7 +1,7 @@
 import { Search, MapPin, Star, Clock, Sparkles, Plane, Package, ShoppingBag, Factory, Briefcase, Bot, Plus, Shield, TrendingUp, ChevronRight, ChevronLeft, Filter, Zap, Cog, Building2, Wheat, Car, Cpu, Shirt, Smartphone, Stethoscope, Coffee, Dumbbell, Beaker, Gamepad2, X, Sun, Moon, Users, Languages, Camera, Copy, Check, Volume2, RefreshCw, ChevronDown, Mic, MicOff } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import touristaLogo from '/TOURISTA AR 2.png';
+import touristaLogo from '/tourista-app-icon.png';
 import { mockTours, mockProducts, tradeCategories } from '../data/mockData';
 import type { Screen, AppMode } from '../App';
 import { AdDisplay } from './AdDisplay';

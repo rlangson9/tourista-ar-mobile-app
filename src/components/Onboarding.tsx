@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronDown, Globe, Briefcase, Compass, User, Building2, Factory, ArrowLeft, X, ExternalLink, Eye, EyeOff, CheckCircle, Mail, Lock, Phone, AlertCircle, Umbrella, Mountain, Coffee, Landmark, Cat } from 'lucide-react';
-import touristaLogo from '/TOURISTA AR 2.png';
+import touristaLogo from '/tourista-app-icon.png';
 
 interface OnboardingProps {
   onComplete: (language: string) => void;
@@ -182,27 +182,83 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               initial={{ scale: 0.5 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring' }}
-              className="mb-8"
+              className="mb-6"
+              style={{ marginTop: "-160px" }}
             >
-              <img src={touristaLogo} alt="Tourista AR" className="h-24 w-auto" />
+              <img src={touristaLogo} alt="Tourista AR" className="h-32 w-auto" />
             </motion.div>
             
             <motion.h1
-              initial={{ y: 20, opacity: 0 }}
+              initial={{ y: 16, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-3xl font-bold mb-4 leading-tight"
+              transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
+              className="mb-2 text-left"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontWeight: 900,
+                fontSize: "42px",
+                lineHeight: 1.1,
+                color: "#FFFFFF",
+              }}
             >
-              Connecting China & the world through immersive travel and intelligent trade solutions
+              <span className="block">The World</span>
+              <span className="block">
+                Through
+                <span
+                  style={{
+                    fontStyle: "italic",
+                    color: "#E8341A",
+                  }}
+                >
+                  New
+                </span>
+              </span>
+              <span className="block">Eyes</span>
             </motion.h1>
             
             <motion.p
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="text-base text-blue-100 mb-12 max-w-md leading-relaxed"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
+              className="text-left mt-0 mb-12 max-w-xs"
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: "18px",
+                lineHeight: 1.5,
+                letterSpacing: "0.01em"
+              }}
             >
-              Explore destinations with AR-powered experiences and source products seamlessly through our AI-driven trade facilitation platform.
+              <span style={{ fontStyle: "italic", fontWeight: 400, color: "rgba(255,255,255,0.45)" }}>
+                Where{" "}
+              </span>
+              <span style={{ fontStyle: "normal", fontWeight: 600, color: "rgba(255,255,255,0.75)" }}>
+                immersive
+              </span>
+              <span style={{ fontStyle: "italic", fontWeight: 400, color: "rgba(255,255,255,0.45)" }}>
+                {" "}travel meets{" "}
+              </span>
+              <span style={{ fontStyle: "normal", fontWeight: 600, color: "rgba(255,255,255,0.75)" }}>
+                intelligent
+              </span>
+              <span style={{ fontStyle: "italic", fontWeight: 400, color: "rgba(255,255,255,0.45)" }}>
+                {" "}trade.
+              </span>
+            </motion.p>
+            
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.9 }}
+              className="w-24 h-0.5 bg-white/70 mb-6 mx-auto"
+            />
+            
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.0 }}
+              className="text-sm text-white/30 mb-6 max-w-xs text-center leading-relaxed"
+            >
+              Explore destinations with AR-powered experiences and source products seamlessly through our AI-driven trade platform.
             </motion.p>
 
             <motion.button

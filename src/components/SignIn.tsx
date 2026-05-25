@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, User, Lock, Eye, EyeOff, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Screen } from '../App';
-import touristaLogo from '/TOURISTA AR 2.png';
+import touristaLogo from '/tourista-app-icon.png';
 
 interface SignInProps {
   onNavigate: (screen: Screen) => void;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, Mail, Globe, Phone, MapPin, ChevronRight } from 'lucide-react';
-import touristaLogo from '/TOURISTA AR 2.png';
+import touristaLogo from '/tourista-app-icon.png';
 import type { Screen } from '../App';
 
 interface AboutProps {
