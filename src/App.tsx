@@ -21,6 +21,7 @@ import { NegotiationTool } from './components/NegotiationTool';
 import { MessageScreen } from './components/MessageScreen';
 import { ProductDiscovery } from './components/ProductDiscovery';
 import { Toaster } from './components/ui/sonner';
+import { useLanguage } from './i18n/LanguageContext';
 
 export type Screen =
   | 'onboarding'
@@ -48,6 +49,7 @@ export type Screen =
 export type AppMode = 'tourism' | 'trade';
 
 export default function App() {
+  const { language, setLanguage } = useLanguage();
   const [currentScreen, setCurrentScreen] = useState<Screen>('onboarding');
   const [selectedTourId, setSelectedTourId] = useState<string | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
@@ -62,7 +64,6 @@ export default function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
   const [adminLoginError, setAdminLoginError] = useState('');
-  const [language, setLanguage] = useState<string>('en');
 
   // Check for admin login URL on initial load
   useEffect(() => {
@@ -238,7 +239,9 @@ export default function App() {
       {userType === 'traveler' && (
         <>
           {currentScreen === 'onboarding' && (
-            <Onboarding onComplete={handleOnboardingComplete} />
+            <Onboarding 
+              onComplete={handleOnboardingComplete}
+            />
           )}
 
           {currentScreen === 'home' && (

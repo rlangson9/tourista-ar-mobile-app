@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronDown, Globe, Briefcase, Compass, User, Building2, Factory, ArrowLeft, X, ExternalLink, Eye, EyeOff, CheckCircle, Mail, Lock, Phone, AlertCircle, Umbrella, Mountain, Coffee, Landmark, Cat, Sparkles, Brain, Package, Plane } from 'lucide-react';
 import touristaLogo from '/tourista-app-icon.png';
+import { useLanguage } from '../i18n/LanguageContext';
+import { Language } from '../i18n/translations';
 
 interface OnboardingProps {
   onComplete: (language: string) => void;
@@ -53,8 +55,9 @@ function getPasswordStrength(password: string): { score: number; label: string; 
 }
 
 export function Onboarding({ onComplete }: OnboardingProps) {
+  const { language, setLanguage, t } = useLanguage();
   const [step, setStep] = useState(0);
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [selectedLanguage, setSelectedLanguage] = useState(language);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [showInterestsDropdown, setShowInterestsDropdown] = useState(false);
@@ -414,7 +417,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               transition={{ delay: 1.0 }}
               className="text-sm text-white/30 mb-6 max-w-xs text-center leading-relaxed"
             >
-              Explore destinations with AR-powered experiences and source products seamlessly through our AI-driven trade platform.
+              {t('onboarding.slide0.description')}
             </motion.p>
 
             <motion.button
@@ -424,7 +427,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               onClick={handleNext}
               className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center gap-2"
             >
-              Get Started
+              {t('onboarding.slide0.cta')}
               <ChevronRight className="w-5 h-5" />
             </motion.button>
 
@@ -452,8 +455,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           >
             <div className="mb-8 mt-12">
               <Globe className="w-12 h-12 mb-4" />
-              <h2 className="text-3xl font-bold mb-2">Select Your Language</h2>
-              <p className="text-blue-100">Choose your preferred language</p>
+              <h2 className="text-3xl font-bold mb-2">{t('onboarding.lang.title')}</h2>
+              <p className="text-blue-100">{t('onboarding.lang.subtitle')}</p>
             </div>
 
             <div className="flex-1 flex items-start justify-center pt-8">
@@ -475,7 +478,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                       showLanguageDropdown ? 'rotate-180' : ''
                     }`} />
                   </button>
-                  
+
                   <AnimatePresence>
                     {showLanguageDropdown && (
                       <motion.div
@@ -490,6 +493,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                             onClick={() => {
                               setSelectedLanguage(lang.code);
                               setShowLanguageDropdown(false);
+                              setLanguage(lang.code as Language);
                             }}
                             className={`w-full p-3 flex items-center gap-3 transition-all ${
                               selectedLanguage === lang.code
@@ -517,7 +521,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               onClick={handleNext}
               className="w-full bg-white text-blue-600 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl transition-all mt-12"
             >
-              Continue
+              {t('onboarding.lang.cta')}
             </button>
 
             <div className="mt-6 flex gap-2 justify-center">
@@ -544,8 +548,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           >
             <div className="mb-8 mt-12">
               <Compass className="w-12 h-12 mb-4" />
-              <h2 className="text-3xl font-bold mb-2">Your Interests</h2>
-              <p className="text-blue-100">Select what interests you (optional)</p>
+              <h2 className="text-3xl font-bold mb-2">{t('onboarding.interests.title')}</h2>
+              <p className="text-blue-100">{t('onboarding.interests.subtitle')}</p>
             </div>
 
             <div className="flex-1 flex items-start justify-center pt-8">
@@ -613,7 +617,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               onClick={handleNext}
               className="w-full bg-white text-blue-600 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl transition-all mt-12"
             >
-              Continue
+              {t('onboarding.interests.cta')}
             </button>
 
             <div className="mt-6 flex gap-2 justify-center">
@@ -639,8 +643,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             className="flex-1 flex flex-col p-6 text-white"
           >
             <div className="mb-8 mt-12">
-              <h2 className="text-3xl font-bold mb-2">How would you like to join Tourista AR?</h2>
-              <p className="text-blue-100">Select your account type</p>
+              <h2 className="text-3xl font-bold mb-2">{t('onboarding.role.title')}</h2>
+              <p className="text-blue-100">{t('onboarding.role.subtitle')}</p>
             </div>
 
             <div className="flex-1 space-y-4">
@@ -654,9 +658,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     <User className="w-8 h-8 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold mb-1">User</h3>
-                    <p className="text-sm text-blue-100">Travel & Trade</p>
-                    <p className="text-xs text-blue-200 mt-2">Book tours and source products</p>
+                    <h3 className="text-xl font-bold mb-1">{t('onboarding.role.user')}</h3>
+                    <p className="text-sm text-blue-100">{t('onboarding.role.user.sub')}</p>
+                    <p className="text-xs text-blue-200 mt-2">{t('onboarding.role.user.desc')}</p>
                   </div>
                   <ChevronRight className="w-6 h-6 text-white/50" />
                 </div>
@@ -672,9 +676,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     <Building2 className="w-8 h-8 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold mb-1">Partner</h3>
-                    <p className="text-sm text-blue-100">Tour Agency</p>
-                    <p className="text-xs text-blue-200 mt-2">List and manage tour packages</p>
+                    <h3 className="text-xl font-bold mb-1">{t('onboarding.role.partner')}</h3>
+                    <p className="text-sm text-blue-100">{t('onboarding.role.partner.sub')}</p>
+                    <p className="text-xs text-blue-200 mt-2">{t('onboarding.role.partner.desc')}</p>
                   </div>
                   <ChevronRight className="w-6 h-6 text-white/50" />
                 </div>
@@ -690,9 +694,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     <Factory className="w-8 h-8 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold mb-1">Supplier</h3>
-                    <p className="text-sm text-blue-100">Trade Vendor</p>
-                    <p className="text-xs text-blue-200 mt-2">Sell products to global buyers</p>
+                    <h3 className="text-xl font-bold mb-1">{t('onboarding.role.supplier')}</h3>
+                    <p className="text-sm text-blue-100">{t('onboarding.role.supplier.sub')}</p>
+                    <p className="text-xs text-blue-200 mt-2">{t('onboarding.role.supplier.desc')}</p>
                   </div>
                   <ChevronRight className="w-6 h-6 text-white/50" />
                 </div>
@@ -700,7 +704,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             </div>
 
             <p className="text-sm text-blue-100 text-center mt-6 bg-white/10 p-4 rounded-2xl">
-              Partners and Suppliers will be redirected to our secure web portal for registration
+              {t('onboarding.role.note')}
             </p>
 
             <div className="mt-6 flex gap-2 justify-center">
@@ -730,11 +734,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               className="mb-6 mt-6 flex items-center gap-2 text-blue-100 hover:text-white transition flex-shrink-0"
             >
               <ArrowLeft className="w-5 h-5" />
-              Back
+              {t('common.back')}
             </button>
 
             <div className="mb-6 flex-shrink-0">
-              <h2 className="text-3xl font-bold mb-1">Create Your Account</h2>
+              <h2 className="text-3xl font-bold mb-1">{t('onboarding.auth.create')}</h2>
               <p className="text-blue-100">Join thousands of global travelers and traders</p>
             </div>
 
@@ -747,7 +751,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   <User className="w-5 h-5 text-white/50 flex-shrink-0" />
                   <input
                     type="text"
-                    placeholder="Full name"
+                    placeholder={t('onboarding.auth.name')}
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
                     onBlur={() => setRegTouched((t) => ({ ...t, name: true }))}
@@ -769,7 +773,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   <Mail className="w-5 h-5 text-white/50 flex-shrink-0" />
                   <input
                     type="email"
-                    placeholder="Email address"
+                    placeholder={t('onboarding.auth.email')}
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     onBlur={() => setRegTouched((t) => ({ ...t, email: true }))}
@@ -791,7 +795,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   <Phone className="w-5 h-5 text-white/50 flex-shrink-0" />
                   <input
                     type="tel"
-                    placeholder="Phone number (e.g. +260 97 000 0000)"
+                    placeholder={t('onboarding.auth.phone')}
                     value={regPhone}
                     onChange={(e) => setRegPhone(e.target.value)}
                     onBlur={() => setRegTouched((t) => ({ ...t, phone: true }))}
@@ -813,7 +817,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   <Lock className="w-5 h-5 text-white/50 flex-shrink-0" />
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Password (min. 8 characters)"
+                    placeholder={t('onboarding.auth.password')}
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
                     onBlur={() => setRegTouched((t) => ({ ...t, password: true }))}
@@ -852,7 +856,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
               {/* Social auth */}
               <div className="pt-2">
-                <div className="text-sm text-center text-blue-100 mb-3">Or continue with</div>
+                <div className="text-sm text-center text-blue-100 mb-3">{t('common.or')}</div>
                 <div className="grid grid-cols-2 gap-3">
                   <button className="p-3 rounded-2xl bg-white text-gray-900 font-semibold flex items-center justify-center gap-2 hover:bg-gray-50 transition">
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -933,11 +937,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               className="mb-8 mt-6 flex items-center gap-2 text-blue-100 hover:text-white transition"
             >
               <ArrowLeft className="w-5 h-5" />
-              Back
+              {t('common.back')}
             </button>
 
             <div className="mb-8">
-              <h2 className="text-3xl font-bold mb-1">Welcome back</h2>
+              <h2 className="text-3xl font-bold mb-1">{t('onboarding.auth.signin')}</h2>
               <p className="text-blue-100">Sign in to your Tourista AR account</p>
             </div>
 
@@ -950,7 +954,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   <Mail className="w-5 h-5 text-white/50 flex-shrink-0" />
                   <input
                     type="email"
-                    placeholder="Email address"
+                    placeholder={t('onboarding.auth.email')}
                     value={signEmail}
                     onChange={(e) => setSignEmail(e.target.value)}
                     onBlur={() => setSignTouched((t) => ({ ...t, email: true }))}
@@ -972,7 +976,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   <Lock className="w-5 h-5 text-white/50 flex-shrink-0" />
                   <input
                     type={showSignPassword ? 'text' : 'password'}
-                    placeholder="Password"
+                    placeholder={t('onboarding.auth.password')}
                     value={signPassword}
                     onChange={(e) => setSignPassword(e.target.value)}
                     onBlur={() => setSignTouched((t) => ({ ...t, password: true }))}
@@ -997,12 +1001,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 onClick={() => setAuthView('forgot-password')}
                 className="text-sm text-blue-100 hover:text-white transition text-right w-full"
               >
-                Forgot password?
+                {t('onboarding.auth.forgot')}
               </button>
 
               {/* Social auth */}
               <div className="pt-2">
-                <div className="text-sm text-center text-blue-100 mb-3">Or continue with</div>
+                <div className="text-sm text-center text-blue-100 mb-3">{t('common.or')}</div>
                 <div className="grid grid-cols-2 gap-3">
                   <button className="p-3 rounded-2xl bg-white text-gray-900 font-semibold flex items-center justify-center gap-2 hover:bg-gray-50 transition">
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -1043,16 +1047,16 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   <span className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
                   Signing in...
                 </>
-              ) : 'Sign In'}
+              ) : t('onboarding.auth.signin')}
             </button>
 
             <p className="text-center text-sm text-blue-100 mt-4">
-              Don't have an account?{' '}
+              {t('onboarding.auth.noaccount')}{' '}
               <button
                 onClick={() => setAuthView('register')}
                 className="underline font-semibold hover:text-white transition"
               >
-                Create one
+                {t('onboarding.auth.create')}
               </button>
             </p>
           </motion.div>
@@ -1072,14 +1076,14 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               className="mb-8 mt-6 flex items-center gap-2 text-blue-100 hover:text-white transition"
             >
               <ArrowLeft className="w-5 h-5" />
-              Back to sign in
+              {t('common.back')}
             </button>
 
             <div className="mb-8">
               <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
                 <Mail className="w-8 h-8" />
               </div>
-              <h2 className="text-3xl font-bold mb-1">Reset Password</h2>
+              <h2 className="text-3xl font-bold mb-1">{t('onboarding.auth.forgot')}</h2>
               <p className="text-blue-100">
                 {forgotSent
                   ? 'Check your inbox — we sent a reset link.'

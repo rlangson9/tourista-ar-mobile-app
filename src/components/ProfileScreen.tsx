@@ -13,6 +13,7 @@ import { CustomerSupportChat } from './CustomerSupportChat';
 import { TwoFactorAuth } from './TwoFactorAuth';
 import { BottomNav } from './BottomNav';
 import { LoyaltyPoints } from './LoyaltyPoints';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface ProfileScreenProps {
   onNavigate: (screen: Screen) => void;
@@ -32,6 +33,7 @@ interface ProfileScreenProps {
 }
 
 export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeChange, language, currency, onLanguageChange, onCurrencyChange, exchangeRates, exchangeRatesLoading, exchangeRatesError, onRefreshExchangeRates, darkMode, onToggleDarkMode }: ProfileScreenProps) {
+  const { t, setLanguage } = useLanguage();
   const [loyaltyPoints, setLoyaltyPoints] = useState(850);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -795,7 +797,7 @@ export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeCh
               onClick={() => setShowPreferencesSettings(true)}
             />
             <MenuItem
-              title="Language & Currency"
+              title={t('profile.language')}
               subtitle="English, USD"
               icon={Globe}
               onClick={() => setShowLanguageCurrencySettings(true)}
@@ -934,7 +936,7 @@ export function ProfileScreen({ onNavigate, onSwitchToPartner, appMode, onModeCh
         {/* Logout */}
         <button className="w-full bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3 text-red-600 font-semibold hover:bg-red-50 transition">
           <LogOut className="w-5 h-5" />
-          <span>Logout</span>
+          <span>{t('profile.logout')}</span>
         </button>
       </div>
 

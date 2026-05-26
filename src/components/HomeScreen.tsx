@@ -7,6 +7,7 @@ import type { Screen, AppMode } from '../App';
 import { AdDisplay } from './AdDisplay';
 import { AIButton } from './AIButton';
 import { BottomNav } from './BottomNav';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface HomeScreenProps {
   onNavigate: (screen: Screen, itemId?: string) => void;
@@ -20,6 +21,7 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChange, isAssistantOpen, onToggleAssistant, darkMode, onToggleDarkMode }: HomeScreenProps) {
+  const { t } = useLanguage();
   console.log('HomeScreen props - isAssistantOpen:', isAssistantOpen, 'onToggleAssistant:', typeof onToggleAssistant);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
@@ -511,7 +513,7 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
               }`}
             >
               <MapPin className="w-4 h-4" />
-              Travel
+              {t('home.travel')}
             </button>
             <button
               onClick={() => {
@@ -526,7 +528,7 @@ export function HomeScreen({ onNavigate, onSwitchToPartner, appMode, onModeChang
               style={appMode === 'trade' ? { color: '#000000' } : {}}
             >
               <Briefcase className="w-4 h-4" />
-              Trade
+              {t('home.trade')}
             </button>
           </div>
           {/* Settings Dropdown */}

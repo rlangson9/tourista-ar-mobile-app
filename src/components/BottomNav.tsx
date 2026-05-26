@@ -1,5 +1,6 @@
 import { Home, Compass, Sparkles, Calendar, User } from 'lucide-react';
 import type { Screen } from '../App';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface BottomNavProps {
   currentScreen: string;
@@ -7,12 +8,13 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
+  const { t } = useLanguage();
   const items = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'explore', label: 'Explore', icon: Compass },
+    { id: 'home', label: t('nav.home'), icon: Home },
+    { id: 'explore', label: t('nav.explore'), icon: Compass },
     { id: 'ar-experience', label: 'AR', icon: Sparkles, isCenter: true },
-    { id: 'bookings', label: 'Bookings', icon: Calendar },
-    { id: 'profile', label: 'Profile', icon: User },
+    { id: 'bookings', label: t('nav.bookings'), icon: Calendar },
+    { id: 'profile', label: t('nav.profile'), icon: User },
   ];
 
   return (
