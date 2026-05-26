@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronDown, Globe, Briefcase, Compass, User, Building2, Factory, ArrowLeft, X, ExternalLink, Eye, EyeOff, CheckCircle, Mail, Lock, Phone, AlertCircle, Umbrella, Mountain, Coffee, Landmark, Cat } from 'lucide-react';
+import { ChevronRight, ChevronDown, Globe, Briefcase, Compass, User, Building2, Factory, ArrowLeft, X, ExternalLink, Eye, EyeOff, CheckCircle, Mail, Lock, Phone, AlertCircle, Umbrella, Mountain, Coffee, Landmark, Cat, Sparkles, Brain, Package, Plane } from 'lucide-react';
 import touristaLogo from '/tourista-app-icon.png';
 
 interface OnboardingProps {
@@ -207,7 +207,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 <span
                   style={{
                     fontStyle: "italic",
-                    color: "#E8341A",
+                    color: "#f46b01",
                   }}
                 >
                   New
@@ -215,6 +215,162 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               </span>
               <span className="block">Eyes</span>
             </motion.h1>
+            
+            {/* ── Feature Pills ───────────────────────────── */}
+            <motion.div
+              className="flex flex-row gap-2 mb-5"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'nowrap',
+                gap: '8px',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '22px',
+                marginTop: '22px',
+                width: '100%',
+                maxWidth: '320px',
+              }}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.50, ease: "easeOut" }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 12px',
+                  borderRadius: '99px',
+                  border: '1px solid rgba(232, 52, 26, 0.35)',
+                  background: 'rgba(232, 52, 26, 0.15)',
+                  backdropFilter: 'blur(8px)',
+                }}
+              >
+                <Sparkles
+                  className="w-3.5 h-3.5"
+                  style={{ color: '#E8341A', flexShrink: 0 }}
+                />
+                <span
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#FFFFFF',
+                    letterSpacing: '0.04em',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  AR
+                </span>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.62, ease: "easeOut" }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 12px',
+                  borderRadius: '99px',
+                  border: '1px solid rgba(212, 168, 67, 0.30)',
+                  background: 'rgba(212, 168, 67, 0.12)',
+                  backdropFilter: 'blur(8px)',
+                }}
+              >
+                <Brain
+                  className="w-3.5 h-3.5"
+                  style={{ color: '#D4A843', flexShrink: 0 }}
+                />
+                <span
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#FFFFFF',
+                    letterSpacing: '0.04em',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  AI
+                </span>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.74, ease: "easeOut" }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 12px',
+                  borderRadius: '99px',
+                  border: '1px solid rgba(96, 196, 168, 0.28)',
+                  background: 'rgba(96, 196, 168, 0.12)',
+                  backdropFilter: 'blur(8px)',
+                }}
+              >
+                <Package
+                  className="w-3.5 h-3.5"
+                  style={{ color: '#60C4A8', flexShrink: 0 }}
+                />
+                <span
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#FFFFFF',
+                    letterSpacing: '0.04em',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Trade
+                </span>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.86, ease: "easeOut" }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 12px',
+                  borderRadius: '99px',
+                  border: '1px solid rgba(126, 184, 255, 0.28)',
+                  background: 'rgba(126, 184, 255, 0.12)',
+                  backdropFilter: 'blur(8px)',
+                }}
+              >
+                <Plane
+                  className="w-3.5 h-3.5"
+                  style={{ color: '#7EB8FF', flexShrink: 0 }}
+                />
+                <span
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#FFFFFF',
+                    letterSpacing: '0.04em',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Travel
+                </span>
+              </motion.div>
+            </motion.div>
             
             <motion.p
               initial={{ opacity: 0, y: 16 }}
