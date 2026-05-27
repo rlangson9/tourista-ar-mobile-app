@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Package,
@@ -31,6 +31,7 @@ import {
   Save,
   X,
   Scale,
+  Loader2,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Screen } from '../App';
@@ -38,6 +39,7 @@ import type { Screen } from '../App';
 import { AdCreationForm, AdFormData } from './AdCreationForm';
 import { WithdrawalManager } from './WithdrawalManager';
 import { PartnerTourMatching } from './PartnerTourMatching';
+import partnerService from '../services/partnerService';
 
 interface PartnerDashboardProps {
   onNavigate: (screen: Screen) => void;
@@ -46,6 +48,110 @@ interface PartnerDashboardProps {
 export function PartnerDashboard({ onNavigate }: PartnerDashboardProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tours' | 'bookings' | 'revenue' | 'payments' | 'advertisements' | 'analytics' | 'automation' | 'tour-matching' | 'settings'>('overview');
   const [isVerified, setIsVerified] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [overviewData, setOverviewData] = useState<any>(null);
+  const [toursData, setToursData] = useState<any[]>([]);
+  const [bookingsData, setBookingsData] = useState<any[]>([]);
+  const [revenueData, setRevenueData] = useState<any>(null);
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+
+  // Fetch overview data
+  const fetchOverview = async () => {
+    setLoading(true);
+    try {
+      const response = await partnerService.getOverview();
+      if (response.success) {
+        setOverviewData(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching overview:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch tours data
+  const fetchTours = async () => {
+    setLoading(true);
+    try {
+      const response = await partnerService.getTours();
+      if (response.success) {
+        setToursData(response.data.tours);
+      }
+    } catch (error) {
+      console.error('Error fetching tours:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch bookings data
+  const fetchBookings = async (status?: string) => {
+    setLoading(true);
+    try {
+      const response = await partnerService.getBookings(status);
+      if (response.success) {
+        setBookingsData(response.data.bookings);
+      }
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch revenue data
+  const fetchRevenue = async () => {
+    setLoading(true);
+    try {
+      const response = await partnerService.getRevenue();
+      if (response.success) {
+        setRevenueData(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching revenue:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch analytics data
+  const fetchAnalytics = async () => {
+    setLoading(true);
+    try {
+      const response = await partnerService.getAnalytics();
+      if (response.success) {
+        setAnalyticsData(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load data based on active tab
+  useEffect(() => {
+    switch (activeTab) {
+      case 'overview':
+        if (!overviewData) fetchOverview();
+        break;
+      case 'tours':
+        if (toursData.length === 0) fetchTours();
+        break;
+      case 'bookings':
+        if (bookingsData.length === 0) fetchBookings();
+        break;
+      case 'revenue':
+        if (!revenueData) fetchRevenue();
+        break;
+      case 'analytics':
+        if (!analyticsData) fetchAnalytics();
+        break;
+      default:
+        break;
+    }
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -146,13 +252,13 @@ export function PartnerDashboard({ onNavigate }: PartnerDashboardProps) {
 
       {/* Main Content */}
       <div className="ml-64 p-8">
-        {activeTab === 'overview' && <OverviewTab onNavigate={setActiveTab} />}
-        {activeTab === 'tours' && <ToursTab />}
-        {activeTab === 'bookings' && <BookingsTab />}
-        {activeTab === 'revenue' && <RevenueTab />}
+        {activeTab === 'overview' && <OverviewTab onNavigate={setActiveTab} data={overviewData} loading={loading} />}
+        {activeTab === 'tours' && <ToursTab tours={toursData} loading={loading} onRefresh={fetchTours} />}
+        {activeTab === 'bookings' && <BookingsTab bookings={bookingsData} loading={loading} onRefresh={fetchBookings} />}
+        {activeTab === 'revenue' && <RevenueTab data={revenueData} loading={loading} />}
         {activeTab === 'payments' && <PaymentsTab />}
         {activeTab === 'advertisements' && <AdvertisementsTab />}
-        {activeTab === 'analytics' && <AnalyticsTab />}
+        {activeTab === 'analytics' && <AnalyticsTab data={analyticsData} loading={loading} />}
         {activeTab === 'automation' && <AutomationTab />}
         {activeTab === 'tour-matching' && <PartnerTourMatching />}
         {activeTab === 'settings' && <SettingsTab />}
@@ -196,7 +302,35 @@ function NavItem({
   );
 }
 
-function OverviewTab({ onNavigate }: { onNavigate: (tab: string) => void }) {
+function OverviewTab({ onNavigate, data, loading }: { onNavigate: (tab: string) => void; data?: any; loading?: boolean }) {
+  // Default to mock data if real data isn't available
+  const metrics = data?.metrics || {
+    totalRevenue: 145680,
+    totalBookings: 486,
+    activeTours: 24,
+    avgRating: 4.8
+  };
+
+  const topTours = data?.topTours || [
+    { id: '1', name: 'Beijing Business & Culture', bookings: 142, revenue: 35580 },
+    { id: '2', name: 'Shanghai Modern Experience', bookings: 98, revenue: 18602 },
+    { id: '3', name: 'Guangzhou Canton Fair', bookings: 76, revenue: 12144 }
+  ];
+
+  const recentBookings = data?.recentBookings || [
+    { _id: 'BK-1234', tourId: { title: 'Beijing Tour' }, userId: { name: 'John Doe', email: 'john@test.com' }, createdAt: '2026-03-15', totalPrice: 2499, status: 'Confirmed' },
+    { _id: 'BK-1235', tourId: { title: 'Shanghai Tour' }, userId: { name: 'Jane Smith', email: 'jane@test.com' }, createdAt: '2026-03-20', totalPrice: 1899, status: 'Pending' },
+    { _id: 'BK-1236', tourId: { title: 'Beijing Tour' }, userId: { name: 'Mike Chen', email: 'mike@test.com' }, createdAt: '2026-04-05', totalPrice: 2499, status: 'Confirmed' },
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-8">
@@ -208,28 +342,28 @@ function OverviewTab({ onNavigate }: { onNavigate: (tab: string) => void }) {
       <div className="grid grid-cols-4 gap-6 mb-8">
         <KPICard
           title="Total Revenue"
-          value="$145,680"
+          value={`$${metrics.totalRevenue.toLocaleString()}`}
           change="+12.5%"
           isPositive
           icon={DollarSign}
         />
         <KPICard
           title="Total Bookings"
-          value="486"
+          value={metrics.totalBookings.toString()}
           change="+8.2%"
           isPositive
           icon={Calendar}
         />
         <KPICard
           title="Active Tours"
-          value="24"
+          value={metrics.activeTours.toString()}
           change="+2"
           isPositive
           icon={Package}
         />
         <KPICard
           title="Avg. Rating"
-          value="4.8"
+          value={metrics.avgRating.toFixed(1)}
           change="+0.2"
           isPositive
           icon={TrendingUp}
@@ -260,21 +394,14 @@ function OverviewTab({ onNavigate }: { onNavigate: (tab: string) => void }) {
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           <h3 className="font-bold text-lg mb-4">Top Performing Tours</h3>
           <div className="space-y-3">
-            <TourPerformanceItem
-              name="Beijing Business & Culture"
-              bookings={142}
-              revenue="$35,580"
-            />
-            <TourPerformanceItem
-              name="Shanghai Modern Experience"
-              bookings={98}
-              revenue="$18,602"
-            />
-            <TourPerformanceItem
-              name="Guangzhou Canton Fair"
-              bookings="76"
-              revenue="$12,144"
-            />
+            {topTours.map((tour: any) => (
+              <TourPerformanceItem
+                key={tour.id}
+                name={tour.name}
+                bookings={tour.bookings}
+                revenue={`$${tour.revenue.toLocaleString()}`}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -302,24 +429,20 @@ function OverviewTab({ onNavigate }: { onNavigate: (tab: string) => void }) {
             </tr>
           </thead>
           <tbody className="text-sm">
-            {[
-              { id: 'BK-1234', tour: 'Beijing Tour', customer: 'John Doe', date: 'Mar 15, 2026', amount: '$2,499', status: 'Confirmed' },
-              { id: 'BK-1235', tour: 'Shanghai Tour', customer: 'Jane Smith', date: 'Mar 20, 2026', amount: '$1,899', status: 'Pending' },
-              { id: 'BK-1236', tour: 'Beijing Tour', customer: 'Mike Chen', date: 'Apr 5, 2026', amount: '$2,499', status: 'Confirmed' },
-            ].map((booking) => (
-              <tr key={booking.id} className="border-b last:border-0">
-                <td className="py-3 font-mono text-xs">{booking.id}</td>
-                <td className="py-3">{booking.tour}</td>
-                <td className="py-3">{booking.customer}</td>
-                <td className="py-3">{booking.date}</td>
-                <td className="py-3 font-semibold">{booking.amount}</td>
+            {recentBookings.map((booking: any) => (
+              <tr key={booking._id || booking.id} className="border-b last:border-0">
+                <td className="py-3 font-mono text-xs">{booking._id?.substring(0, 8) || booking.id}</td>
+                <td className="py-3">{booking.tourId?.title || booking.tour}</td>
+                <td className="py-3">{booking.userId?.name || booking.customer}</td>
+                <td className="py-3">{new Date(booking.createdAt || booking.date).toLocaleDateString()}</td>
+                <td className="py-3 font-semibold">${booking.totalPrice?.toLocaleString() || booking.amount}</td>
                 <td className="py-3">
                   <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                    booking.status === 'Confirmed'
+                    booking.status === 'Confirmed' || booking.status === 'confirmed'
                       ? 'bg-green-100 text-green-700'
                       : 'bg-yellow-100 text-yellow-700'
                   }`}>
-                    {booking.status}
+                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                   </span>
                 </td>
               </tr>
@@ -331,66 +454,92 @@ function OverviewTab({ onNavigate }: { onNavigate: (tab: string) => void }) {
   );
 }
 
-function ToursTab() {
-  const [tours, setTours] = useState([
+function ToursTab({ tours: propTours, loading, onRefresh }: { tours?: any[]; loading?: boolean; onRefresh?: () => void }) {
+  // Default to mock data if real data isn't available
+  const [tours, setTours] = useState<any[]>(propTours && propTours.length > 0 ? propTours : [
     {
-      id: '1',
+      _id: '1',
       title: 'Beijing Business & Culture Tour',
       category: 'Business',
-      price: '$2,499',
+      price: 2499,
       bookings: 142,
       rating: 4.8,
-      status: 'active',
-      image: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=200'
+      isActive: true,
+      images: ['https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=200']
     },
     {
-      id: '2',
+      _id: '2',
       title: 'Shanghai Modern China Experience',
       category: 'Cultural',
-      price: '$1,899',
+      price: 1899,
       bookings: 98,
       rating: 4.7,
-      status: 'active',
-      image: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=200'
+      isActive: true,
+      images: ['https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=200']
     },
     {
-      id: '3',
+      _id: '3',
       title: 'Guangzhou Canton Fair Business Trip',
       category: 'Business',
-      price: '$1,599',
+      price: 1599,
       bookings: 76,
       rating: 4.6,
-      status: 'inactive',
-      image: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=200'
+      isActive: false,
+      images: ['https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=200']
     }
   ]);
+  
   const [editingTour, setEditingTour] = useState<any>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
-  const handleEdit = (tour: any) => {
+  // Update tours when prop changes
+  useEffect(() => {
+    if (propTours && propTours.length > 0) {
+      setTours(propTours);
+    }
+  }, [propTours]);
+
+  const handleEdit = async (tour: any) => {
     setEditingTour(tour);
     // In a real app, this would open a modal with an edit form
     alert(`Editing tour: ${tour.title}`);
     // For demo purposes, we'll just toggle the status
-    setTours(prev => prev.map(t => 
-      t.id === tour.id 
-        ? { ...t, status: t.status === 'active' ? 'inactive' : 'active' }
-        : t
-    ));
+    try {
+      await partnerService.updateTour(tour._id || tour.id, {
+        isActive: !tour.isActive
+      });
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      console.error('Error updating tour:', error);
+    }
   };
 
   const handleDelete = (tourId: string) => {
     setShowDeleteConfirm(tourId);
   };
 
-  const confirmDelete = (tourId: string) => {
-    setTours(prev => prev.filter(t => t.id !== tourId));
+  const confirmDelete = async (tourId: string) => {
+    try {
+      await partnerService.deleteTour(tourId);
+      setTours(prev => prev.filter(t => (t._id || t.id) !== tourId));
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      console.error('Error deleting tour:', error);
+    }
     setShowDeleteConfirm(null);
   };
 
   const cancelDelete = () => {
     setShowDeleteConfirm(null);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -423,11 +572,16 @@ function ToursTab() {
 
       {/* Tours List */}
       <div className="space-y-4">
-        {tours.map((tour) => (
-          <div key={tour.id} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition">
+        {tours.map((tour) => {
+          const tourId = tour._id || tour.id;
+          const status = tour.isActive !== undefined ? (tour.isActive ? 'active' : 'inactive') : tour.status;
+          const image = tour.images?.[0] || tour.image;
+          
+          return (
+          <div key={tourId} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition">
             <div className="flex items-center gap-6">
               <img
-                src={tour.image}
+                src={image}
                 alt={tour.title}
                 className="w-32 h-32 rounded-lg object-cover"
               />
@@ -444,15 +598,17 @@ function ToursTab() {
                     </div>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    tour.status === 'active' 
+                    status === 'active' 
                       ? 'bg-green-100 text-green-700' 
                       : 'bg-gray-100 text-gray-700'
                   }`}>
-                    {tour.status.charAt(0).toUpperCase() + tour.status.slice(1)}
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between mt-4">
-                  <div className="text-2xl font-bold text-blue-600">{tour.price}</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    ${typeof tour.price === 'number' ? tour.price.toLocaleString() : tour.price}
+                  </div>
                   <div className="flex gap-2">
                     <button 
                       className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
@@ -462,7 +618,7 @@ function ToursTab() {
                     </button>
                     <button 
                       className="p-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition"
-                      onClick={() => handleDelete(tour.id)}
+                      onClick={() => handleDelete(tourId)}
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -471,7 +627,8 @@ function ToursTab() {
               </div>
             </div>
           </div>
-        ))}
+        );
+        })}
       </div>
 
       {/* Delete Confirmation Modal */}
@@ -501,27 +658,66 @@ function ToursTab() {
   );
 }
 
-function BookingsTab() {
+function BookingsTab({ bookings: propBookings, loading, onRefresh }: { bookings?: any[]; loading?: boolean; onRefresh?: (status?: string) => void }) {
   const [bookingFilter, setBookingFilter] = useState<'all' | 'confirmed' | 'pending' | 'cancelled'>('all');
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
-  
-  const bookings = Array.from({ length: 5 }).map((_, i) => ({
-    id: `BK-${1234 + i}`,
-    tour: 'Beijing Tour',
-    duration: '7 days',
-    customer: 'John Doe',
-    email: 'john@email.com',
-    date: `Mar ${15 + i}, 2026`,
-    travelers: 2,
-    amount: '$4,998',
-    status: 'Confirmed',
-    phone: '+1 555-123-4567',
-    address: '123 Main St, New York, NY 10001',
+  const [bookings, setBookings] = useState<any[]>([]);
+
+  // Default to mock data if real data isn't available
+  const mockBookings = Array.from({ length: 5 }).map((_, i) => ({
+    _id: `BK-${1234 + i}`,
+    tourId: { title: 'Beijing Tour', duration: 7 },
+    userId: { name: 'John Doe', email: 'john@email.com', phone: '+1 555-123-4567' },
+    tourDate: `Mar ${15 + i}, 2026`,
+    numberOfParticipants: 2,
+    totalPrice: 4998,
+    status: 'confirmed',
     specialRequests: 'Vegetarian meals, early check-in requested',
     paymentMethod: 'Credit Card',
-    bookingDate: 'Feb 20, 2026',
+    createdAt: 'Feb 20, 2026',
   }));
+
+  // Update bookings when prop changes
+  useEffect(() => {
+    if (propBookings && propBookings.length > 0) {
+      setBookings(propBookings);
+    } else {
+      setBookings(mockBookings);
+    }
+  }, [propBookings]);
+
+  const handleFilterChange = (filter: 'all' | 'confirmed' | 'pending' | 'cancelled') => {
+    setBookingFilter(filter);
+    if (onRefresh) {
+      onRefresh(filter === 'all' ? undefined : filter);
+    }
+  };
+
+  const handleStatusUpdate = async (bookingId: string, newStatus: string) => {
+    try {
+      await partnerService.updateBookingStatus(bookingId, newStatus);
+      setBookings(prev => prev.map(b => 
+        (b._id || b.id) === bookingId ? { ...b, status: newStatus } : b
+      ));
+      if (onRefresh) onRefresh();
+      alert(`Booking status updated to ${newStatus}`);
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  const filteredBookings = bookingFilter === 'all' 
+    ? bookings 
+    : bookings.filter(b => b.status === bookingFilter);
 
   return (
     <div>
@@ -534,27 +730,27 @@ function BookingsTab() {
         <div className="p-6 border-b border-gray-200 flex gap-3">
           <button 
             className={bookingFilter === 'all' ? 'px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold' : 'px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-semibold transition'}
-            onClick={() => setBookingFilter('all')}
+            onClick={() => handleFilterChange('all')}
           >
-            All (12)
+            All ({bookings.length})
           </button>
           <button 
             className={bookingFilter === 'confirmed' ? 'px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold' : 'px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-semibold transition'}
-            onClick={() => setBookingFilter('confirmed')}
+            onClick={() => handleFilterChange('confirmed')}
           >
-            Confirmed (8)
+            Confirmed ({bookings.filter(b => b.status === 'confirmed').length})
           </button>
           <button 
             className={bookingFilter === 'pending' ? 'px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold' : 'px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-semibold transition'}
-            onClick={() => setBookingFilter('pending')}
+            onClick={() => handleFilterChange('pending')}
           >
-            Pending (4)
+            Pending ({bookings.filter(b => b.status === 'pending').length})
           </button>
           <button 
             className={bookingFilter === 'cancelled' ? 'px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold' : 'px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-semibold transition'}
-            onClick={() => setBookingFilter('cancelled')}
+            onClick={() => handleFilterChange('cancelled')}
           >
-            Cancelled (0)
+            Cancelled ({bookings.filter(b => b.status === 'cancelled').length})
           </button>
         </div>
 
@@ -572,38 +768,64 @@ function BookingsTab() {
             </tr>
           </thead>
           <tbody>
-            {bookings.map((booking) => (
-              <tr key={booking.id} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-4 font-mono text-sm">{booking.id}</td>
+            {filteredBookings.map((booking) => {
+              const bookingId = booking._id || booking.id;
+              const tourTitle = booking.tourId?.title || booking.tour;
+              const tourDuration = booking.tourId?.duration ? `${booking.tourId.duration} days` : booking.duration;
+              const customerName = booking.userId?.name || booking.customer;
+              const customerEmail = booking.userId?.email || booking.email;
+              const bookingDate = booking.tourDate || booking.date;
+              const travelers = booking.numberOfParticipants || booking.travelers;
+              const amount = typeof booking.totalPrice === 'number' ? `$${booking.totalPrice.toLocaleString()}` : booking.amount;
+              const status = booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1) || 'Pending';
+              
+              return (
+              <tr key={bookingId} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="p-4 font-mono text-sm">{bookingId.substring(0, 10)}</td>
                 <td className="p-4">
-                  <div className="font-semibold">{booking.tour}</div>
-                  <div className="text-xs text-gray-500">{booking.duration}</div>
+                  <div className="font-semibold">{tourTitle}</div>
+                  <div className="text-xs text-gray-500">{tourDuration}</div>
                 </td>
                 <td className="p-4">
-                  <div className="font-semibold">{booking.customer}</div>
-                  <div className="text-xs text-gray-500">{booking.email}</div>
+                  <div className="font-semibold">{customerName}</div>
+                  <div className="text-xs text-gray-500">{customerEmail}</div>
                 </td>
-                <td className="p-4">{booking.date}</td>
-                <td className="p-4">{booking.travelers}</td>
-                <td className="p-4 font-bold">{booking.amount}</td>
+                <td className="p-4">{new Date(bookingDate).toLocaleDateString()}</td>
+                <td className="p-4">{travelers}</td>
+                <td className="p-4 font-bold">{amount}</td>
                 <td className="p-4">
-                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
-                    {booking.status}
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                    booking.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {status}
                   </span>
                 </td>
                 <td className="p-4">
-                  <button 
-                    className="text-blue-600 hover:underline text-sm font-semibold"
-                    onClick={() => {
-                      setSelectedBooking(booking);
-                      setShowBookingModal(true);
-                    }}
-                  >
-                    View Details
-                  </button>
+                  <div className="flex gap-2">
+                    <button 
+                      className="text-blue-600 hover:underline text-sm font-semibold"
+                      onClick={() => {
+                        setSelectedBooking(booking);
+                        setShowBookingModal(true);
+                      }}
+                    >
+                      View Details
+                    </button>
+                    {booking.status === 'pending' && (
+                      <button 
+                        className="text-green-600 hover:underline text-sm font-semibold"
+                        onClick={() => handleStatusUpdate(bookingId, 'confirmed')}
+                      >
+                        Confirm
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -627,10 +849,14 @@ function BookingsTab() {
               <div className="flex items-center justify-between bg-blue-50 p-4 rounded-xl">
                 <div>
                   <p className="text-sm text-gray-600">Booking ID</p>
-                  <p className="text-lg font-bold">{selectedBooking.id}</p>
+                  <p className="text-lg font-bold">{(selectedBooking._id || selectedBooking.id).substring(0, 15)}</p>
                 </div>
-                <span className="bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold">
-                  {selectedBooking.status}
+                <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                  selectedBooking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                  selectedBooking.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                  'bg-red-100 text-red-700'
+                }`}>
+                  {selectedBooking.status?.charAt(0).toUpperCase() + selectedBooking.status?.slice(1) || 'Pending'}
                 </span>
               </div>
 
@@ -640,19 +866,19 @@ function BookingsTab() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-gray-500">Name</p>
-                    <p className="font-semibold">{selectedBooking.customer}</p>
+                    <p className="font-semibold">{selectedBooking.userId?.name || selectedBooking.customer}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Email</p>
-                    <p className="font-semibold">{selectedBooking.email}</p>
+                    <p className="font-semibold">{selectedBooking.userId?.email || selectedBooking.email}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Phone</p>
-                    <p className="font-semibold">{selectedBooking.phone}</p>
+                    <p className="font-semibold">{selectedBooking.userId?.phone || selectedBooking.phone || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Address</p>
-                    <p className="font-semibold">{selectedBooking.address}</p>
+                    <p className="font-semibold">{selectedBooking.address || 'N/A'}</p>
                   </div>
                 </div>
               </div>
@@ -663,19 +889,19 @@ function BookingsTab() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-gray-500">Tour Name</p>
-                    <p className="font-semibold">{selectedBooking.tour}</p>
+                    <p className="font-semibold">{selectedBooking.tourId?.title || selectedBooking.tour}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Duration</p>
-                    <p className="font-semibold">{selectedBooking.duration}</p>
+                    <p className="font-semibold">{selectedBooking.tourId?.duration ? `${selectedBooking.tourId.duration} days` : selectedBooking.duration || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Travel Date</p>
-                    <p className="font-semibold">{selectedBooking.date}</p>
+                    <p className="font-semibold">{new Date(selectedBooking.tourDate || selectedBooking.date).toLocaleDateString()}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Travelers</p>
-                    <p className="font-semibold">{selectedBooking.travelers} {selectedBooking.travelers === 1 ? 'person' : 'people'}</p>
+                    <p className="font-semibold">{selectedBooking.numberOfParticipants || selectedBooking.travelers} {(selectedBooking.numberOfParticipants || selectedBooking.travelers) === 1 ? 'person' : 'people'}</p>
                   </div>
                 </div>
               </div>
@@ -686,15 +912,17 @@ function BookingsTab() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-gray-500">Total Amount</p>
-                    <p className="text-xl font-bold text-blue-600">{selectedBooking.amount}</p>
+                    <p className="text-xl font-bold text-blue-600">
+                      ${typeof selectedBooking.totalPrice === 'number' ? selectedBooking.totalPrice.toLocaleString() : selectedBooking.amount}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Payment Method</p>
-                    <p className="font-semibold">{selectedBooking.paymentMethod}</p>
+                    <p className="font-semibold">{selectedBooking.paymentMethod || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Booking Date</p>
-                    <p className="font-semibold">{selectedBooking.bookingDate}</p>
+                    <p className="font-semibold">{new Date(selectedBooking.createdAt || selectedBooking.bookingDate).toLocaleDateString()}</p>
                   </div>
                 </div>
               </div>
@@ -732,23 +960,47 @@ function BookingsTab() {
   );
 }
 
-function RevenueTab() {
+function RevenueTab({ data, loading }: { data?: any; loading?: boolean }) {
   const [chartType, setChartType] = useState<'bar' | 'line' | 'area'>('bar');
-  const revenueData = [
-    { month: 'Jan', value: 12500 },
-    { month: 'Feb', value: 18200 },
-    { month: 'Mar', value: 15800 },
-    { month: 'Apr', value: 22400 },
-    { month: 'May', value: 19800 },
-    { month: 'Jun', value: 28500 },
-    { month: 'Jul', value: 24600 },
-    { month: 'Aug', value: 35200 },
-    { month: 'Sep', value: 29800 },
-    { month: 'Oct', value: 38400 },
-    { month: 'Nov', value: 31500 },
-    { month: 'Dec', value: 42100 },
-  ];
-  const maxRevenue = Math.max(...revenueData.map(d => d.value));
+  
+  const mockData = {
+    totalRevenue: 145680,
+    commission: 21852,
+    netEarnings: 123828,
+    monthlyRevenue: [
+      { month: 'Jan', value: 12500 },
+      { month: 'Feb', value: 18200 },
+      { month: 'Mar', value: 15800 },
+      { month: 'Apr', value: 22400 },
+      { month: 'May', value: 19800 },
+      { month: 'Jun', value: 28500 },
+      { month: 'Jul', value: 24600 },
+      { month: 'Aug', value: 35200 },
+      { month: 'Sep', value: 29800 },
+      { month: 'Oct', value: 38400 },
+      { month: 'Nov', value: 31500 },
+      { month: 'Dec', value: 42100 },
+    ],
+    paymentHistory: [
+      { date: 'Feb 1, 2026', desc: 'Monthly Settlement', amount: 12450, commission: 1868, net: 10582, status: 'Paid' },
+      { date: 'Jan 1, 2026', desc: 'Monthly Settlement', amount: 10230, commission: 1535, net: 8695, status: 'Paid' },
+    ]
+  };
+
+  const revenueData = data?.monthlyRevenue || mockData.monthlyRevenue;
+  const maxRevenue = Math.max(...revenueData.map((d: any) => d.value));
+  const totalRevenue = data?.totalRevenue || mockData.totalRevenue;
+  const commission = data?.commission || mockData.commission;
+  const netEarnings = data?.netEarnings || mockData.netEarnings;
+  const paymentHistory = data?.paymentHistory || mockData.paymentHistory;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -764,15 +1016,15 @@ function RevenueTab() {
             <h3 className="text-gray-600">Total Revenue</h3>
             <DollarSign className="w-5 h-5 text-green-600" />
           </div>
-          <p className="text-3xl font-bold mb-2">$145,680</p>
+          <p className="text-3xl font-bold mb-2">${totalRevenue.toLocaleString()}</p>
           <p className="text-sm text-green-600">+12.5% from last month</p>
         </div>
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-gray-600">Commission (15%)</h3>
+            <h3 className="text-gray-600">Commission (10%)</h3>
             <DollarSign className="w-5 h-5 text-blue-600" />
           </div>
-          <p className="text-3xl font-bold mb-2">$21,852</p>
+          <p className="text-3xl font-bold mb-2">${commission.toLocaleString()}</p>
           <p className="text-sm text-gray-500">Platform fee</p>
         </div>
         <div className="bg-white rounded-2xl p-6 shadow-sm">
@@ -780,7 +1032,7 @@ function RevenueTab() {
             <h3 className="text-gray-600">Net Earnings</h3>
             <TrendingUp className="w-5 h-5 text-purple-600" />
           </div>
-          <p className="text-3xl font-bold mb-2">$123,828</p>
+          <p className="text-3xl font-bold mb-2">${netEarnings.toLocaleString()}</p>
           <p className="text-sm text-purple-600">Available for payout</p>
         </div>
       </div>
@@ -817,7 +1069,7 @@ function RevenueTab() {
           </div>
         </div>
         <div className="h-64 flex items-end justify-around gap-3">
-          {revenueData.map((data, i) => (
+          {revenueData.map((data: any, i: number) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-2">
               <div className="text-xs font-semibold text-gray-600 w-full text-center truncate" title={`$${data.value.toLocaleString()}`}>
                 ${data.value >= 1000 ? `${(data.value / 1000).toFixed(0)}K` : data.value}
@@ -870,15 +1122,12 @@ function RevenueTab() {
             </tr>
           </thead>
           <tbody>
-            {[
-              { date: 'Feb 1, 2026', desc: 'Monthly Settlement', amount: '$12,450', commission: '$1,868', net: '$10,582', status: 'Paid' },
-              { date: 'Jan 1, 2026', desc: 'Monthly Settlement', amount: '$10,230', commission: '$1,535', net: '$8,695', status: 'Paid' },
-            ].map((payment, i) => (
+            {paymentHistory.map((payment: any, i: number) => (
               <tr key={i} className="border-b">
                 <td className="py-4">{payment.date}</td>
                 <td className="py-4">{payment.desc}</td>
-                <td className="py-4 font-semibold">{payment.amount}</td>
-                <td className="py-4 text-red-600">-{payment.commission}</td>
+                <td className="py-4 font-semibold">${payment.amount.toLocaleString()}</td>
+                <td className="py-4 text-red-600">-${payment.commission.toLocaleString()}</td>
                 <td className="py-4 font-bold text-green-600">{payment.net}</td>
                 <td className="py-4">
                   <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
@@ -1903,14 +2152,89 @@ function SettingsTab() {
   );
 }
 
-function AnalyticsTab() {
+function AnalyticsTab({ data, loading }: { data?: any; loading?: boolean }) {
   const [analyticsTab, setAnalyticsTab] = useState<'demand' | 'customer' | 'competitor' | 'revenue'>('demand');
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Advanced Analytics</h1>
         <p className="text-gray-500">Unlock powerful insights for your business</p>
+      </div>
+
+      {/* Core metrics */}
+      <div className="grid grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-gray-600 text-sm">Total Views</h3>
+            <Eye className="w-5 h-5 text-blue-600" />
+          </div>
+          <p className="text-3xl font-bold mb-2">{(data?.totalViews || 15682).toLocaleString()}</p>
+          <p className="text-sm text-green-600">+12% from last month</p>
+        </div>
+        <div className="bg-white rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-gray-600 text-sm">Confirmed Bookings</h3>
+            <Calendar className="w-5 h-5 text-green-600" />
+          </div>
+          <p className="text-3xl font-bold mb-2">{data?.confirmedBookings || 486}</p>
+          <p className="text-sm text-green-600">+8% from last month</p>
+        </div>
+        <div className="bg-white rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-gray-600 text-sm">Conversion Rate</h3>
+            <TrendingUp className="w-5 h-5 text-purple-600" />
+          </div>
+          <p className="text-3xl font-bold mb-2">{(data?.conversionRate || 3.1).toFixed(1)}%</p>
+          <p className="text-sm text-green-600">+0.5% from last month</p>
+        </div>
+        <div className="bg-white rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-gray-600 text-sm">Avg. Rating</h3>
+            <Award className="w-5 h-5 text-amber-600" />
+          </div>
+          <p className="text-3xl font-bold mb-2">{(data?.avgRating || 4.8).toFixed(1)}</p>
+          <p className="text-sm text-green-600">+0.2 from last month</p>
+        </div>
+      </div>
+
+      {/* Tour performance list */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm mb-8">
+        <h3 className="font-bold text-lg mb-6">Tour Performance</h3>
+        <table className="w-full">
+          <thead>
+            <tr className="text-left text-sm text-gray-500 border-b">
+              <th className="pb-3">Tour</th>
+              <th className="pb-3">Views</th>
+              <th className="pb-3">Bookings</th>
+              <th className="pb-3">Rating</th>
+              <th className="pb-3">Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(data?.tourPerformance || [
+              { id: '1', title: 'Beijing Business & Culture', views: 4523, bookings: 142, rating: 4.8, revenue: 35580 },
+              { id: '2', title: 'Shanghai Modern Experience', views: 3289, bookings: 98, rating: 4.7, revenue: 18602 },
+              { id: '3', title: 'Guangzhou Canton Fair', views: 2145, bookings: 76, rating: 4.6, revenue: 12144 },
+            ]).map((tour: any, i: number) => (
+              <tr key={i} className="border-b last:border-0">
+                <td className="py-4 font-medium">{tour.title}</td>
+                <td className="py-4">{tour.views.toLocaleString()}</td>
+                <td className="py-4">{tour.bookings}</td>
+                <td className="py-4">⭐ {tour.rating}</td>
+                <td className="py-4 font-semibold text-blue-600">${tour.revenue.toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       <div className="flex gap-4 mb-8 border-b border-gray-200">

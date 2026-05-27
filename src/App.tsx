@@ -65,9 +65,9 @@ export default function App() {
   const [adminPassword, setAdminPassword] = useState('');
   const [adminLoginError, setAdminLoginError] = useState('');
 
-  // Check for admin login URL on initial load
+  // Check for special URL paths on initial load
   useEffect(() => {
-    const checkAdminPath = () => {
+    const checkSpecialPaths = () => {
       const path = window.location.pathname;
       // Check if accessing admin portal via path
       // For production: touristaadmin.com/admin-portal
@@ -75,8 +75,14 @@ export default function App() {
       if (path === '/admin-portal') {
         setCurrentScreen('admin-login');
       }
+      // Check if accessing partner dashboard via path
+      if (path === '/partner-dashboard') {
+        setUserType('partner');
+        setCurrentScreen('partner-dashboard');
+        setHasSelectedRole(true);
+      }
     };
-    checkAdminPath();
+    checkSpecialPaths();
   }, []);
 
   // Listen for openAIAssistant custom event from other components

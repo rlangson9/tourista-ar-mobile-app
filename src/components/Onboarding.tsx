@@ -415,7 +415,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.0 }}
-              className="text-sm text-white/30 mb-6 max-w-xs text-center leading-relaxed"
+              className="text-sm text-white/75 mb-6 max-w-xs text-center leading-relaxed font-semibold"
+              style={{ fontFamily: 'var(--font-cormorant)' }}
             >
               {t('onboarding.slide0.description')}
             </motion.p>
@@ -1254,7 +1255,24 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               <button
                 className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-base mb-3 hover:bg-blue-700 transition flex items-center justify-center gap-2"
                 onClick={() => {
-                  window.open('https://tourista-ar.com/register', '_blank');
+                  const newWindow = window.open('https://tourista-ar.com/register', '_blank');
+                  if (newWindow) {
+                    const checkInterval = setInterval(() => {
+                      if (newWindow.closed) {
+                        clearInterval(checkInterval);
+                      }
+                    }, 1000);
+                    
+                    setTimeout(() => {
+                      clearInterval(checkInterval);
+                      if (!newWindow.closed) {
+                        newWindow.close();
+                        alert('The registration portal is currently unavailable. Please try again later or contact support at support@tourista-ar.com');
+                      }
+                    }, 10000);
+                  } else {
+                    alert('Please allow pop-ups to access the registration portal.');
+                  }
                   setPortalModal(null);
                 }}
               >
