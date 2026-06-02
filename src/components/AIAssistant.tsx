@@ -80,7 +80,7 @@ export function AIAssistant({ isOpen, onToggle, appMode }: AIAssistantProps) {
     setError(null);
 
     try {
-      const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5002';
+      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
       // Build history excluding the initial welcome message
       const conversationHistory = updatedMessages.map((m) => ({

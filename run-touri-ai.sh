@@ -3,7 +3,7 @@
 # TOURI AI Model - Startup Script
 # Uses TOURI_AI_PATH environment variable if set, otherwise defaults to the correct path
 
-TOURI_AI_PATH=${TOURI_AI_PATH:-"/Volumes/Untitled 1/TOURI AI Model/Touri Ai"}
+TOURI_AI_PATH=${TOURI_AI_PATH:-"/Volumes/Untitled/TOURI AI Model/Touri Ai"}
 TOURI_AI_MODEL_PATH="$TOURI_AI_PATH/tourista_ai_model"
 
 # Check if TOURI AI model exists

@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5002/api/partners';
+const API_BASE = `${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/partners`;
 
 interface ApiResponse<T> {
   success: boolean;

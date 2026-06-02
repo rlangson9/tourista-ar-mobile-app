@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 cd "$(dirname "$0")/.."
 
 # TOURI AI Model path - uses environment variable if set
-TOURI_AI_PATH=${TOURI_AI_PATH:-"/Volumes/Untitled 1/TOURI AI Model/Touri Ai"}
+TOURI_AI_PATH=${TOURI_AI_PATH:-"/Volumes/Untitled/TOURI AI Model/Touri Ai"}
 TOURI_AI_MODEL_PATH="$TOURI_AI_PATH/tourista_ai_model"
 
 echo -e "${YELLOW}Checking TOURI AI Model...${NC}"
